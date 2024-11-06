@@ -73,4 +73,6 @@ crashlytics-build.properties
 
 /Assets/Mirror/*
 /Assets/TextMesh Pro/*
+/Assets/Resources/*
+/Assets/Scene/*
 *.meta
