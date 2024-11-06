@@ -77,3 +77,6 @@ crashlytics-build.properties
 /Assets/Resources/*
 /Assets/Scenes/*
 *.meta
+/.plastic
+/Assets/Adaptive Performance/Settings
+*.conf
