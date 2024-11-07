@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 namespace MainSceneUI
@@ -10,6 +11,8 @@ namespace MainSceneUI
         public LobbyPanel   lobbyPanel;     //大厅界面
         public SearchPanel  searchPanel;    //搜索界面
         public RoomPanel    roomPanel;      //房间界面
+
+        public TMP_Text     userName;       //左下角的用户名字
 
         private void Awake()
         {

@@ -80,3 +80,4 @@ crashlytics-build.properties
 /.plastic
 /Assets/Adaptive Performance/Settings
 *.conf
+/Assets/StreamingAssets/db.db

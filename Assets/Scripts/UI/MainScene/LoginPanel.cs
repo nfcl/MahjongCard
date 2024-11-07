@@ -12,6 +12,7 @@ namespace MainSceneUI
         {
             if (DataManager.Login(nameInput.text))
             {
+                MainSceneUIManager.instance.userName.text = DataManager.userInfo.name;
                 MainSceneUIManager.instance.loginPanel.Close();
                 MainSceneUIManager.instance.lobbyPanel.Open();
             }
