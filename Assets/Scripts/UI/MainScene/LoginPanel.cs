@@ -23,13 +23,11 @@ namespace MainSceneUI
         }
         public void Open()
         {
-            canvasGroup.alpha = 1;
-            canvasGroup.blocksRaycasts = true;
+            canvasGroup.Open();
         }
         public void Close()
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.blocksRaycasts = false;
+            canvasGroup.Close();
         }
     }
 }
