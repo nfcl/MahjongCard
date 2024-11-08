@@ -29,7 +29,7 @@ namespace Network
             }
         }
 
-        #region 玩家进出房间消息
+        #region 玩家进出房间同步
 
         public void SendPlayerEnterMsg()
         {
@@ -86,6 +86,8 @@ namespace Network
 
         #endregion
 
+        #region 玩家准备状态切换
+
         [Command]
         public void CmdChangeRoomPlayerReadyState(NetworkConnectionToClient sender = null)
         {
@@ -111,5 +113,8 @@ namespace Network
                 MainSceneUIManager.instance.roomPanel.SwitchReadyButtonState(isAllPlayerReady ? RoomPanel.ReadyButtonState.AllReady : RoomPanel.ReadyButtonState.NotAllReady);
             }
         }
+
+        #endregion
+
     }
 }

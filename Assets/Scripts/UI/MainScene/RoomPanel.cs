@@ -93,6 +93,7 @@ namespace MainSceneUI
             if (RoomPlayer.instance.isServer)
             {
                 //¿ªÊ¼ÓÎÏ·
+                NetworkRoomManager.instance.allPlayersReady = true;
             }
             else
             {
