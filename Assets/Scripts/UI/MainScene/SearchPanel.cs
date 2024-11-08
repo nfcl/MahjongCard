@@ -87,7 +87,7 @@ namespace MainSceneUI
                     {
                         MainSceneUIManager.instance.propPanel.Close();
                         MainSceneUIManager.instance.searchPanel.Close();
-                        MainSceneUIManager.instance.roomPanel.Open();
+                        MainSceneUIManager.instance.roomPanel.Open(false);
                     },
                     delegate
                     {

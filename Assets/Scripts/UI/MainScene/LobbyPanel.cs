@@ -26,7 +26,7 @@ namespace MainSceneUI
                     {
                         MainSceneUIManager.instance.lobbyPanel.Close();
                         MainSceneUIManager.instance.propPanel.Close();
-                        MainSceneUIManager.instance.roomPanel.Open();
+                        MainSceneUIManager.instance.roomPanel.Open(true);
                     },
                     delegate
                     {

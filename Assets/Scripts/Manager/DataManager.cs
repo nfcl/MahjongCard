@@ -3,6 +3,7 @@ using Mirror;
 using SQLiteTable;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DataManager : MonoBehaviour
@@ -60,23 +61,43 @@ public class DataManager : MonoBehaviour
 
     #region 房间信息
 
-    private static Dictionary<NetworkConnectionToClient, UserInfo> roomPlayerUserInfos;
+    private static Dictionary<NetworkConnectionToClient, RoomPlayerInfo> roomPlayerInfos;
 
     public static void OnServerInit()
     {
-        roomPlayerUserInfos = new Dictionary<NetworkConnectionToClient, UserInfo>();
+        roomPlayerInfos = new Dictionary<NetworkConnectionToClient, RoomPlayerInfo>();
     }
-    public static void AddRoomPlayer(NetworkConnectionToClient connection, UserInfo roomPlayerUserInfo)
+    public static int GetFirstEmptySlot()
     {
-        roomPlayerUserInfos[connection] = roomPlayerUserInfo;
+        for(int i = 0; i < 4; ++i)
+        {
+            if(roomPlayerInfos.Count(_=>_.Value.roomSlotIndex == i) == 0)
+            {
+                return i;
+            }
+        }
+        return -1;
     }
-    public static UserInfo GetRoomPlayerUserInfo(NetworkConnectionToClient connection)
+    public static int AddRoomPlayer(NetworkConnectionToClient connection, RoomPlayerInfo roomPlayerUserInfo)
     {
-        if(roomPlayerUserInfos.TryGetValue(connection, out UserInfo userInfo))
+        roomPlayerInfos[connection] = roomPlayerUserInfo;
+        return roomPlayerUserInfo.roomSlotIndex;
+    }
+    public static RoomPlayerInfo GetRoomPlayerUserInfo(NetworkConnectionToClient connection)
+    {
+        if(roomPlayerInfos.TryGetValue(connection, out RoomPlayerInfo userInfo))
         {
             return userInfo;
         }
         return null;
+    }
+    public static RoomPlayerInfo[] GetAllRoomPlayerUserInfos()
+    {
+        return roomPlayerInfos.Values.ToArray();
+    }
+    public static bool IsAllRoomPlayerReady()
+    {
+        return roomPlayerInfos.Count == 4 && roomPlayerInfos.Count(_ => _.Value.isReady) == roomPlayerInfos.Count;
     }
 
     #endregion
