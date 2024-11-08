@@ -20,6 +20,7 @@ namespace MainSceneUI
             try
             {
                 MainSceneUIManager.instance.propPanel.Wait("创建房间ing...");
+                DataManager.OnServerInit();
                 NetworkRoomManager.instance.StartHost(
                     delegate
                     {

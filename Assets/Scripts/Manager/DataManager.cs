@@ -1,6 +1,8 @@
 using Data;
+using Mirror;
 using SQLiteTable;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DataManager : MonoBehaviour
@@ -52,6 +54,29 @@ public class DataManager : MonoBehaviour
         string randomStartTrim = UnityEngine.Random.Range(0, 1000000).ToString("000000");
         string timestamp = DateTime.Now.Ticks.ToString();
         return $"{randomStartTrim}_{timestamp}";
+    }
+
+    #endregion
+
+    #region 房间信息
+
+    private static Dictionary<NetworkConnectionToClient, UserInfo> roomPlayerUserInfos;
+
+    public static void OnServerInit()
+    {
+        roomPlayerUserInfos = new Dictionary<NetworkConnectionToClient, UserInfo>();
+    }
+    public static void AddRoomPlayer(NetworkConnectionToClient connection, UserInfo roomPlayerUserInfo)
+    {
+        roomPlayerUserInfos[connection] = roomPlayerUserInfo;
+    }
+    public static UserInfo GetRoomPlayerUserInfo(NetworkConnectionToClient connection)
+    {
+        if(roomPlayerUserInfos.TryGetValue(connection, out UserInfo userInfo))
+        {
+            return userInfo;
+        }
+        return null;
     }
 
     #endregion

@@ -1,3 +1,6 @@
+using Data;
+using DG.Tweening;
+using Mirror;
 using System;
 using UnityEngine;
 using static MainSceneUI.PropPanel;
@@ -31,6 +34,12 @@ namespace Network
             NetworkDiscovery.instance.AdvertiseServer();
         }
 
+        public override void OnRoomStopHost()
+        {
+            base.OnRoomStopHost();
+            NetworkDiscovery.instance.StopDiscovery();
+        }
+
         public override void OnRoomClientConnect()
         {
             base.OnRoomClientConnect();
@@ -43,6 +52,18 @@ namespace Network
             base.OnRoomClientDisconnect();
             Debug.Log($"Àë¿ª·¿¼ä");
             leaveRoomCallback?.Invoke();
+        }
+
+        public override void OnRoomServerConnect(NetworkConnectionToClient conn)
+        {
+            base.OnRoomServerConnect(conn);
+        }
+
+        public override void OnRoomServerDisconnect(NetworkConnectionToClient conn)
+        {
+            base.OnRoomServerDisconnect(conn);
+
+            NetworkManager.instance.SendPlayerLeaveMsg(conn);
         }
 
         private new void Awake()

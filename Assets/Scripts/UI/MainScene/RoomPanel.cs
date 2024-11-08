@@ -1,3 +1,4 @@
+using Network;
 using UnityEngine;
 
 namespace MainSceneUI
@@ -13,6 +14,21 @@ namespace MainSceneUI
         public void Close()
         {
             canvasGroup.Close();
+        }
+        public void Ready()
+        {
+
+        }
+        public void Return()
+        {
+            if (RoomPlayer.instance.isServer)
+            {
+                NetworkRoomManager.instance.StopHost();
+            }
+            else
+            {
+                NetworkRoomManager.instance.StopClient();
+            }
         }
     }
 }
