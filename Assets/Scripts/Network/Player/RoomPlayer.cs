@@ -10,13 +10,12 @@ namespace Network
     {
         public static RoomPlayer instance;
 
-        private void Awake()
-        {
-            instance = this;
-        }
         private void OnDestroy()
         {
-            instance = null;
+            if(isLocalPlayer && isOwned)
+            {
+                instance = null;
+            }
         }
 
         public override void OnStartClient()
@@ -25,6 +24,10 @@ namespace Network
 
             if (isLocalPlayer)
             {
+                if (this.isOwned)
+                {
+                    instance = this;
+                }
                 SendPlayerEnterMsg();
             }
         }
@@ -75,9 +78,7 @@ namespace Network
         public void RpcSendPlayerLeaveRoomMsg(string uuid, string name)
         {
             Debug.Log($"玩家_{uuid}_{name}离开房间");
-
             MainSceneUIManager.instance.roomPanel.RemovePlayer(uuid);
-
             if (RoomPlayer.instance.isServer)
             {
                 MainSceneUIManager.instance.roomPanel.SwitchReadyButtonState(RoomPanel.ReadyButtonState.NotAllReady);
@@ -88,7 +89,7 @@ namespace Network
 
         #region 玩家准备状态切换
 
-        [Command]
+        [Command(requiresAuthority = false)]
         public void CmdChangeRoomPlayerReadyState(NetworkConnectionToClient sender = null)
         {
             RoomPlayerInfo info = DataManager.GetRoomPlayerUserInfo(sender);

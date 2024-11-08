@@ -63,7 +63,10 @@ namespace Network
         {
             base.OnRoomServerDisconnect(conn);
 
-            RoomPlayer.instance.SendPlayerLeaveMsg(conn);
+            if(conn.connectionId != 0)
+            {
+                RoomPlayer.instance.SendPlayerLeaveMsg(conn);
+            }
         }
 
         private new void Awake()

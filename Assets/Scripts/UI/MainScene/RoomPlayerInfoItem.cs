@@ -21,6 +21,7 @@ public class RoomPlayerInfoItem : MonoBehaviour
         readyIcon.gameObject.SetActive(!playerInfo.isHost);
         nameText.text = playerInfo.name;
         background.color = backgroundColors.hasPlayer;
+        ChangeReadyState(playerInfo.isReady);
     }
     public void Clear()
     {
