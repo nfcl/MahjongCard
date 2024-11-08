@@ -2,7 +2,6 @@ using Data;
 using MainSceneUI;
 using Mirror;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Network
@@ -44,6 +43,8 @@ namespace Network
             {
                 RpcSendPlayerLeaveRoomMsg(playerInfo.uuid, playerInfo.name);
             }
+
+            DataManager.RemoveRoomPlayer(conn);
         }
         [Command(requiresAuthority = false)]
         public void CmdSendUserInfo(RoomPlayerInfo playerInfo, NetworkConnectionToClient sender = null)
@@ -66,7 +67,7 @@ namespace Network
             }
         }
         [TargetRpc]
-        public void TargetSyncAllPlayerToNewPlayer(NetworkConnectionToClient connextion, RoomPlayerInfo[] infos)
+        public void TargetSyncAllPlayerToNewPlayer(NetworkConnectionToClient connection, RoomPlayerInfo[] infos)
         {
             MainSceneUIManager.instance.roomPanel.SyncAllPlayerInfos(infos);
         }
@@ -74,6 +75,13 @@ namespace Network
         public void RpcSendPlayerLeaveRoomMsg(string uuid, string name)
         {
             Debug.Log($"玩家_{uuid}_{name}离开房间");
+
+            MainSceneUIManager.instance.roomPanel.RemovePlayer(uuid);
+
+            if (RoomPlayer.instance.isServer)
+            {
+                MainSceneUIManager.instance.roomPanel.SwitchReadyButtonState(RoomPanel.ReadyButtonState.NotAllReady);
+            }
         }
 
         #endregion

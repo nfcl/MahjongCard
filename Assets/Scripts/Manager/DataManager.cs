@@ -99,6 +99,10 @@ public class DataManager : MonoBehaviour
     {
         return roomPlayerInfos.Count == 4 && roomPlayerInfos.Count(_ => _.Value.isReady) == roomPlayerInfos.Count;
     }
+    public static void RemoveRoomPlayer(NetworkConnectionToClient connection)
+    {
+        roomPlayerInfos.Remove(connection);
+    }
 
     #endregion
 

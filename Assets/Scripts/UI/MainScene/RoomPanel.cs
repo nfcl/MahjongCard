@@ -71,6 +71,10 @@ namespace MainSceneUI
                 roomPlayerInfoItems[info.roomSlotIndex].Init(info);
             }
         }
+        public void RemovePlayer(string uuid)
+        {
+            roomPlayerInfoItems.Where(_ => _.uuid == uuid).FirstOrDefault()?.Clear();
+        }
         public void Open(bool isHost)
         {
             SwitchReadyButtonState(isHost ? ReadyButtonState.NotAllReady : ReadyButtonState.NotReady);
