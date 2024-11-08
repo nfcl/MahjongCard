@@ -33,7 +33,22 @@ namespace SQLiteTable
             {
                 return -1;
             }
-            return SqliteUtils.connection.Insert(table);
+            if(SqliteUtils.connection.Insert(table) != 0)
+            {
+                UserTable tempTable = SqliteUtils.connection.Table<UserTable>().Where(_ => _.name == table.name).FirstOrDefault();
+                if(tempTable == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return tempTable.id;
+                }
+            }
+            else
+            {
+                return -1;
+            }
         }
         public static bool Update(UserTable table)
         {
