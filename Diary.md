@@ -29,3 +29,54 @@ _好唐的小标题_
 测试了一下也没出现之前实机运行的Host无法被编辑器内运行的Client搜索到的情况了（希望后面也不要出现）。
 
 不过现在加了版本管理的话就算出现了还能倒退版本看看到底怎么个事（嘻）。
+
+现在是8日的晚上（已经回到家了）。
+
+终于发现了困扰我很久的（包括之前被删项目的）一个离奇问题，那就是RoomPlayer单例的设置和销毁逻辑。
+
+由于RoomPlayer会在同一个场景生成多个，但我又天真的还在用Awake设置。因此每有一个新玩家加入就会导致单例的被重新设置为新加入的玩家的RoomPlayer
+
+错误的逻辑↓
+```C#
+
+    private void Awake()
+    {
+        instance = this;
+    }
+    private void OnDestroy()
+    {
+        instance = null;
+    }
+
+```
+
+正确的逻辑应该为同时判断IsLocalPlayer和IsOwned（好像其中一个也行），这样才能保证RoomPlayer的单例始终保持在自身客户端的RoomPlayer上。
+
+正确的逻辑↓
+```C#
+
+    private void OnDestroy()
+    {
+        if(isLocalPlayer && isOwned)
+        {
+            instance = null;
+        }
+    }
+
+    public override void OnStartClient()
+    {
+        ...
+
+        if (isLocalPlayer)
+        {
+            if (this.isOwned)
+            {
+                instance = this;
+            }
+            ...
+        }
+    }
+
+```
+
+目前已经算是把房间功能做好了，接下来就可以开始动手从房间跳转到游戏的逻辑了。
