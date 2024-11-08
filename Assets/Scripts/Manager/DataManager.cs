@@ -97,7 +97,7 @@ public class DataManager : MonoBehaviour
     }
     public static bool IsAllRoomPlayerReady()
     {
-        return roomPlayerInfos.Count == 4 && roomPlayerInfos.Count(_ => _.Value.isReady) == roomPlayerInfos.Count;
+        return roomPlayerInfos.Count == 4 && roomPlayerInfos.Count(_ => _.Value.isReady || _.Value.isHost) == roomPlayerInfos.Count;
     }
     public static void RemoveRoomPlayer(NetworkConnectionToClient connection)
     {
