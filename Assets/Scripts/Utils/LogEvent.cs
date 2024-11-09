@@ -4,20 +4,22 @@ using Unity.VisualScripting;
 
 public class LogEvent : MonoBehaviour
 {
+    public static LogEvent instance;
+
     public Color[] logTextColors;
 
     public TMP_Text logText;
 
-    public static bool isExsist = false;
-
     private void Awake()
     {
-        Application.logMessageReceived += HandleLog;
-        if (isExsist)
+        if(instance != null)
         {
             DestroyImmediate(this.gameObject);
         }
-        isExsist = true;
+        instance = this;
+        DontDestroyOnLoad(instance.gameObject);
+
+        Application.logMessageReceived += HandleLog;
     }
 
     //private void Start()
@@ -30,13 +32,13 @@ public class LogEvent : MonoBehaviour
     //    Debug.LogAssertion("Test Assertion");
     //}
 
-    void HandleLog(string condition, string stackTrace, LogType type)
+    public void HandleLog(string condition, string stackTrace, LogType type)
     {
         string message = $"type = {type}\ncondition = {condition}\nstackTrace = {stackTrace.Trim()}\n";
         SendLog($"<color=#{logTextColors[(int)type].ToHexString()}>{message}</color>");
     }
 
-    void SendLog(string message)
+    private void SendLog(string message)
     {
         logText.text += message;
     }

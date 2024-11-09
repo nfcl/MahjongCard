@@ -61,6 +61,7 @@ public class DataManager : MonoBehaviour
 
     #region 房间信息
 
+    public static int playerNum = 4;
     private static Dictionary<NetworkConnectionToClient, RoomPlayerInfo> roomPlayerInfos;
 
     public static void OnServerInit()
@@ -69,7 +70,7 @@ public class DataManager : MonoBehaviour
     }
     public static int GetFirstEmptySlot()
     {
-        for(int i = 0; i < 4; ++i)
+        for(int i = 0; i < playerNum; ++i)
         {
             if(roomPlayerInfos.Count(_=>_.Value.roomSlotIndex == i) == 0)
             {
@@ -97,11 +98,30 @@ public class DataManager : MonoBehaviour
     }
     public static bool IsAllRoomPlayerReady()
     {
-        return roomPlayerInfos.Count == 4 && roomPlayerInfos.Count(_ => _.Value.isReady || _.Value.isHost) == roomPlayerInfos.Count;
+        return roomPlayerInfos.Count == playerNum && roomPlayerInfos.Count(_ => _.Value.isReady || _.Value.isHost) == roomPlayerInfos.Count;
     }
     public static void RemoveRoomPlayer(NetworkConnectionToClient connection)
     {
         roomPlayerInfos.Remove(connection);
+    }
+    public static void CancelAllReadyState()
+    {
+        foreach(var info in roomPlayerInfos)
+        {
+            info.Value.isReady = false;
+        }
+    }
+
+    private static int clientSceneChangedNum = 0;
+    public static int ClientSceneChangedNum { get { return clientSceneChangedNum; } }
+
+    public static void OnSceneChanged()
+    {
+        clientSceneChangedNum = 0;
+    }
+    public static void OnClientSceneChanged()
+    {
+        clientSceneChangedNum += 1;
     }
 
     #endregion
