@@ -9,8 +9,16 @@ namespace Card
         public MeshRenderer cardSkinRender;
         public SpriteRenderer face;
         public Transform shadow;
+        public GameObject moveShining;
 
         public CardKind faceKind;
+        public bool isBao
+        {
+            set
+            {
+                moveShining.SetActive(value);
+            }
+        }
 
         #region PaiHe
 
@@ -32,6 +40,7 @@ namespace Card
         {
             faceKind = kind;
             face.sprite = DataManager.GetCardFaceSprite(faceKind);
+            isBao = kind.isBao;
         }
         public void Init(PaiHe paiHe, bool isLiZhi, bool isHide)
         {
@@ -48,6 +57,7 @@ namespace Card
             this.isLiZhi = isLiZhi;
 
             face.gameObject.SetActive(!isHide);
+            moveShining.SetActive(!isHide && faceKind.isBao);
         }
         public void Init(HandCard handCard, bool isHide)
         {
@@ -59,6 +69,7 @@ namespace Card
             shadow.localEulerAngles = newEuler;
 
             face.gameObject.SetActive(!isHide);
+            moveShining.SetActive(!isHide && faceKind.isBao);
         }
 
         //private void OnValidate()

@@ -1,3 +1,4 @@
+using Card;
 using UnityEngine;
 
 namespace GameSceneUI
@@ -7,6 +8,7 @@ namespace GameSceneUI
         public static GameSceneUIManager instance;
 
         public EnterPanel enterPanel;
+        public GamePanel gamePanel;
 
         private void Awake()
         {

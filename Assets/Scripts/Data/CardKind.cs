@@ -1,15 +1,17 @@
 using System;
-using System.Collections;
+using UnityEngine;
 
 namespace Data
 {
     public class CardKind :IComparable<CardKind>
     {
         public int value = 0;
+        public bool isBao = false;
 
-        public CardKind(int kind)
+        public CardKind(int kind, bool isBao)
         {
             value = kind;
+            this.isBao = isBao;
         }
 
         public static bool operator ==(CardKind self, CardKind other)
@@ -43,9 +45,27 @@ namespace Data
             };
         }
 
+        public static CardKind GetRandomKind()
+        {
+            return new CardKind(UnityEngine.Random.Range(0, 37), UnityEngine.Random.Range(0, 10) == 0);
+        }
         public int CompareTo(CardKind other)
         {
             return value.CompareTo(other.value);
+        }
+        public class LogicComparer
+        {
+            public static int[] order =
+            {
+                 4, 0, 1, 2, 3, 5, 6, 7, 8, 9,
+                14,10,11,12,13,15,16,17,18,19,
+                24,20,21,22,23,25,26,27,28,29,
+                30,31,32,33,34,35,36
+            };
+            public static int Compare(CardKind x, CardKind y)
+            {
+                return order[x.value] - order[y.value];
+            }
         }
     }
 }

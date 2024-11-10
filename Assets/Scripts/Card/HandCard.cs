@@ -39,9 +39,9 @@ namespace Card
         {
             for (int i = 0; i < 13; ++i) 
             {
-                CreateCard(new CardKind(i));
+                CreateCard(new CardKind(i, Random.Range(0, 10) == 0));
             }
-            DrawCard(new CardKind(13));
+            DrawCard(new CardKind(13, Random.Range(0, 10) == 0));
         }
         public void AddCard(RealCard card)
         {
@@ -66,7 +66,7 @@ namespace Card
         }
         public void FormatCard()
         {
-            cards.Sort();
+            cards.Sort((x, y) => CardKind.LogicComparer.Compare(x.faceKind, y.faceKind));
             for (int i = 0; i < cards.Count; ++i)
             {
                 MoveCard(cards[i], i);

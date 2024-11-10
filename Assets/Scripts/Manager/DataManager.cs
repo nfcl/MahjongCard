@@ -191,6 +191,35 @@ public class DataManager : MonoBehaviour
 
     #endregion
 
+    #region UI≈∆–≈œ¢
+
+    private static Sprite[] normalFace;
+    private static int[] faceOrder = new int[] {
+        14,6,28,15,22,2,31,25,18,3,
+        4,7,35,21,23,8,1,32,26,11,
+        5,12,13,29,30,16,9,0,33,19,
+        20,34,36,37,24,17,10
+    };
+    public static Vector3 uiHandCardStartPosition = new Vector3(-680, 0, 0);
+    public static Vector3 uiHandCardNormalDistance = new Vector3(89, 0, 0);
+    public static Vector3 uiHandCardNewDrewDistance = new Vector3(117, 0, 0);
+
+    public static int uiHandCardConfigurPerGroupCount = 4;
+    public static float uiHandCardConfigurDrawPauseDuration = 0.5f;
+    public static float uiHandCardConfigurDrawMoveDuration = 0.3f;
+    public static float uiHandCardConfigurGroupAppearDuration = 0.5f;
+
+    public void LoadUICardFaceSprites()
+    {
+        normalFace = Resources.LoadAll<Sprite>("Card/Hand");
+    }
+    public static Sprite GetUICardFaceSprite(CardKind kind)
+    {
+        return normalFace[faceOrder[kind.value]];
+    }
+
+    #endregion
+
     private void Awake()
     {
         if (instance != null)
@@ -202,6 +231,7 @@ public class DataManager : MonoBehaviour
 
         LoadCardBackData();
         LoadCardFaceData();
+        LoadUICardFaceSprites();
     }
     private void OnApplicationQuit()
     {
