@@ -1,4 +1,5 @@
 using Data;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace Card
@@ -32,7 +33,7 @@ namespace Card
             faceKind = kind;
             face.sprite = DataManager.GetCardFaceSprite(faceKind);
         }
-        public void Init(PaiHe paiHe, bool isLiZhi)
+        public void Init(PaiHe paiHe, bool isLiZhi, bool isHide)
         {
             transform.SetParent(paiHe.transform);
             Vector3 newEuler;
@@ -45,16 +46,19 @@ namespace Card
             shadow.localEulerAngles = newEuler;
 
             this.isLiZhi = isLiZhi;
+
+            face.gameObject.SetActive(!isHide);
         }
-        public void Init(HandCard handCard)
+        public void Init(HandCard handCard, bool isHide)
         {
-            Vector3 newEuler;
-            newEuler = transform.localEulerAngles;
-            newEuler.x = -90;
+            transform.SetParent(handCard.transform);
+            Vector3 newEuler = new Vector3(-90, 0, 90);
             transform.localEulerAngles = newEuler;
             newEuler = shadow.localEulerAngles;
-            newEuler.y = 0;
+            newEuler.y = handCard.IsShowHandCard ? 90 : 0;
             shadow.localEulerAngles = newEuler;
+
+            face.gameObject.SetActive(!isHide);
         }
 
         //private void OnValidate()

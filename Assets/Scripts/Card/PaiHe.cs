@@ -39,14 +39,16 @@ namespace Card
             bool isLizhi = false;
             for (int i = 0; i < 40; ++i)
             {
+                RealCard newCard = RealCard.Create();
+                newCard.Init(new Data.CardKind(i % 37));
                 if (!isLizhi && Random.Range(i, 40) == 39)
                 {
                     isLizhi = true;
-                    AddCard(RealCard.Create(), true);
+                    AddCard(newCard, true);
                 }
                 else
                 {
-                    AddCard(RealCard.Create(), false);
+                    AddCard(newCard, false);
                 }
             }
         }
@@ -88,7 +90,7 @@ namespace Card
         }
         public void AddCard(RealCard card, bool isLiZhi)
         {
-            card.Init(this, isLiZhi);
+            card.Init(this, isLiZhi, false);
             card.transform.localPosition = GetNextCardPosition(isLiZhi);
             cards.Add(card);
         }
