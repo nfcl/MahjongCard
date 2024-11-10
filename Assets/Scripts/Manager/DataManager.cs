@@ -1,3 +1,4 @@
+using Card;
 using Data;
 using Mirror;
 using SQLiteTable;
@@ -126,6 +127,65 @@ public class DataManager : MonoBehaviour
 
     #endregion
 
+    #region 实体牌信息
+
+    public static int cardSkin = 1;
+    public static Material realCardBackMat;
+    public static Sprite[] handBackSprites;
+    private static Sprite[] realCardFaceSprites;
+
+    public static float paiHeCardY = 0.135f;
+    public static float paiHeCardNormalHorizentalDistance = 0.14f;
+    public static float paiHeLiZhiCardHorizentalDistance = 0.18f;
+    public static float paiHeCardVerticalDistance = 0.36f;
+    private static Vector2 paiHeStartLeftBorder = new Vector2(-0.7f - paiHeCardNormalHorizentalDistance, -1.17f);
+    private static float paiHeBottomestLimit = paiHeStartLeftBorder.y - (4 - 1) * paiHeCardVerticalDistance - 0.001f;
+    private static float paiHeMainChunkHorizentalDistance = (2 * 6 + 0.8f) * paiHeCardNormalHorizentalDistance;
+    private static float paiHeSubChunkHorizentalDistance = (2 * 4 + 0.8f) * paiHeCardNormalHorizentalDistance;
+
+    public static Vector2 GetChunkLimit(int chunkIndex)
+    {
+        Vector2 result = new Vector2(GetChunkStartLeftBorder(chunkIndex).x, paiHeBottomestLimit);
+        if(chunkIndex > 0)
+        {
+            result.x += 2 * 4 * paiHeCardNormalHorizentalDistance;
+        }
+        else
+        {
+            result.x += 2 * 6 * paiHeCardNormalHorizentalDistance;
+        }
+        return result;
+    }
+    public static Vector2 GetChunkStartLeftBorder(int chunkIndex)
+    {
+        Vector2 result = paiHeStartLeftBorder;
+        if(chunkIndex > 0)
+        {
+            result.x += paiHeMainChunkHorizentalDistance;
+        }
+        if (chunkIndex > 1)
+        {
+            result.x += (chunkIndex - 1) * paiHeSubChunkHorizentalDistance;
+        }
+        return result;
+    }
+
+    public static void LoadCardBackData()
+    {
+        realCardBackMat = Resources.Load<Material>($"{CardSkins.skinPaths[cardSkin]}/Real/Material");
+        handBackSprites = Resources.LoadAll<Sprite>($"{CardSkins.skinPaths[cardSkin]}/Hand/hand");
+    }
+    public static void LoadCardFaceData()
+    {
+        realCardFaceSprites = Resources.LoadAll<Sprite>("Card/RealFace");
+    }
+    public static Sprite GetCardFaceSprite(CardKind faceKind)
+    {
+        return realCardFaceSprites[faceKind.value];
+    }
+
+    #endregion
+
     private void Awake()
     {
         if (instance != null)
@@ -134,6 +194,9 @@ public class DataManager : MonoBehaviour
         }
         DontDestroyOnLoad(this.gameObject);
         instance = this;
+
+        LoadCardBackData();
+        LoadCardFaceData();
     }
     private void OnApplicationQuit()
     {
