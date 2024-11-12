@@ -1,4 +1,6 @@
+using GameLogic;
 using GameSceneUI;
+using Manager;
 using Mirror;
 using UnityEngine;
 
@@ -30,7 +32,10 @@ namespace Network
             if (DataManager.playerNum == DataManager.ClientSceneChangedNum)
             {
                 Debug.Log("服务端 : 所有客户端场景已加载完毕");
+
                 RpcAllClientSceneChanged();
+
+                IGameLogicManager.instance.GameStart();
             }
         }
         [ClientRpc]
@@ -42,7 +47,6 @@ namespace Network
         public void RpcAllClientSceneChanged()
         {
             Debug.Log("所有客户端场景已加载完毕");
-            GameSceneUIManager.instance.enterPanel.Close();
         }
     }
 }

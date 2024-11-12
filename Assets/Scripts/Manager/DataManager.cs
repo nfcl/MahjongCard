@@ -64,10 +64,12 @@ public class DataManager : MonoBehaviour
 
     public static int playerNum = 4;
     private static Dictionary<NetworkConnectionToClient, RoomPlayerInfo> roomPlayerInfos;
+    public static RoomPlayerInfo[] roomIndexToPlayers;
 
     public static void OnServerInit()
     {
         roomPlayerInfos = new Dictionary<NetworkConnectionToClient, RoomPlayerInfo>();
+        roomIndexToPlayers = new RoomPlayerInfo[playerNum];
     }
     public static int GetFirstEmptySlot()
     {
@@ -83,6 +85,7 @@ public class DataManager : MonoBehaviour
     public static int AddRoomPlayer(NetworkConnectionToClient connection, RoomPlayerInfo roomPlayerUserInfo)
     {
         roomPlayerInfos[connection] = roomPlayerUserInfo;
+        roomIndexToPlayers[roomPlayerUserInfo.roomSlotIndex] = roomPlayerUserInfo;
         return roomPlayerUserInfo.roomSlotIndex;
     }
     public static RoomPlayerInfo GetRoomPlayerUserInfo(NetworkConnectionToClient connection)

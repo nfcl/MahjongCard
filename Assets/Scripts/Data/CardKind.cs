@@ -1,17 +1,14 @@
 using System;
-using UnityEngine;
 
 namespace Data
 {
-    public class CardKind :IComparable<CardKind>
+    public struct CardKind :IComparable<CardKind>
     {
-        public int value = 0;
-        public bool isBao = false;
+        public int value;
 
-        public CardKind(int kind, bool isBao)
+        public CardKind(int kind)
         {
             value = kind;
-            this.isBao = isBao;
         }
 
         public static bool operator ==(CardKind self, CardKind other)
@@ -47,7 +44,7 @@ namespace Data
 
         public static CardKind GetRandomKind()
         {
-            return new CardKind(UnityEngine.Random.Range(0, 37), UnityEngine.Random.Range(0, 10) == 0);
+            return new CardKind(UnityEngine.Random.Range(0, 37));
         }
         public int CompareTo(CardKind other)
         {

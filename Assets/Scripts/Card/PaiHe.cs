@@ -40,7 +40,7 @@ namespace Card
             for (int i = 0; i < 40; ++i)
             {
                 RealCard newCard = RealCard.Create();
-                newCard.Init(new Data.CardKind(i % 37, Random.Range(0, 10) == 0));
+                newCard.Init(new Data.CardKind(i % 37));
                 if (!isLizhi && Random.Range(i, 40) == 39)
                 {
                     isLizhi = true;

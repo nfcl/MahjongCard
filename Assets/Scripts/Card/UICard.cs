@@ -35,8 +35,6 @@ namespace Card
 
             cardFace.sprite = DataManager.GetUICardFaceSprite(faceKind);
             cardBack.sprite = DataManager.handBackSprites[0];
-
-            moveShining.gameObject.SetActive(faceKind.isBao);
         }
         public void DoDraw()
         {

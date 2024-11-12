@@ -40,7 +40,7 @@ namespace Card
         {
             faceKind = kind;
             face.sprite = DataManager.GetCardFaceSprite(faceKind);
-            isBao = kind.isBao;
+            isBao = false;
         }
         public void Init(PaiHe paiHe, bool isLiZhi, bool isHide)
         {
@@ -57,7 +57,6 @@ namespace Card
             this.isLiZhi = isLiZhi;
 
             face.gameObject.SetActive(!isHide);
-            moveShining.SetActive(!isHide && faceKind.isBao);
         }
         public void Init(HandCard handCard, bool isHide)
         {
@@ -69,7 +68,6 @@ namespace Card
             shadow.localEulerAngles = newEuler;
 
             face.gameObject.SetActive(!isHide);
-            moveShining.SetActive(!isHide && faceKind.isBao);
         }
 
         //private void OnValidate()
