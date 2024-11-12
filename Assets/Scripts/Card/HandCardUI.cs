@@ -13,26 +13,30 @@ namespace Card
 
         private void Awake()
         {
+            DestroyImmediate(GetComponent<HandCardUIDebuger>());
+            Clear();
+        }
+        public void Start()
+        {
+            //CardKind[] kinds = new CardKind[13];
+            //for(int i = 0; i < kinds.Length; ++i)
+            //{
+            //    kinds[i] = CardKind.GetRandomKind();
+            //}
+            //ConfigurInitialHandCard(kinds)
+            //    .AppendInterval(1)
+            //    .AppendCallback(() =>
+            //    {
+            //        DrawCard(CardKind.GetRandomKind(), true);
+            //    });
+        }
+        public void Clear()
+        {
             while (transform.childCount > 0)
             {
                 DestroyImmediate(transform.GetChild(0).gameObject);
             }
-            DestroyImmediate(GetComponent<HandCardUIDebuger>());
             cards = new List<UICard>();
-        }
-        public void Start()
-        {
-            CardKind[] kinds = new CardKind[13];
-            for(int i = 0; i < kinds.Length; ++i)
-            {
-                kinds[i] = CardKind.GetRandomKind();
-            }
-            ConfigurInitialHandCard(kinds)
-                .AppendInterval(1)
-                .AppendCallback(() =>
-                {
-                    DrawCard(CardKind.GetRandomKind(), true);
-                });
         }
         public Sequence ConfigurInitialHandCard(CardKind[] kinds)
         {

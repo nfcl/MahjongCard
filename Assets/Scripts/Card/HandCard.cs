@@ -29,19 +29,23 @@ namespace Card
         private void Awake()
         {
             DestroyImmediate(gameObject.GetComponent<HandCardDebuger>());
+            Clear();
+        }
+        private void Start()
+        {
+            //for (int i = 0; i < 13; ++i) 
+            //{
+            //    CreateCard(new CardKind(i));
+            //}
+            //DrawCard(new CardKind(13));
+        }
+        public void Clear()
+        {
             while (transform.childCount > 0)
             {
                 DestroyImmediate(transform.GetChild(0).gameObject);
             }
             cards = new List<RealCard>();
-        }
-        private void Start()
-        {
-            for (int i = 0; i < 13; ++i) 
-            {
-                CreateCard(new CardKind(i));
-            }
-            DrawCard(new CardKind(13));
         }
         public void AddCard(RealCard card)
         {

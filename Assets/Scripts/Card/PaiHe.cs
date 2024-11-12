@@ -27,30 +27,34 @@ namespace Card
 
         private void Awake()
         {
+            Clear();
+        }
+        private void Start()
+        {
+            ChunkIndex = 0;
+            //bool isLizhi = false;
+            //for (int i = 0; i < 40; ++i)
+            //{
+            //    RealCard newCard = RealCard.Create();
+            //    newCard.Init(new Data.CardKind(i % 37));
+            //    if (!isLizhi && Random.Range(i, 40) == 39)
+            //    {
+            //        isLizhi = true;
+            //        AddCard(newCard, true);
+            //    }
+            //    else
+            //    {
+            //        AddCard(newCard, false);
+            //    }
+            //}
+        }
+        public void Clear()
+        {
             while (transform.childCount > 0)
             {
                 DestroyImmediate(transform.GetChild(0).gameObject);
             }
             cards = new List<RealCard>();
-        }
-        private void Start()
-        {
-            ChunkIndex = 0;
-            bool isLizhi = false;
-            for (int i = 0; i < 40; ++i)
-            {
-                RealCard newCard = RealCard.Create();
-                newCard.Init(new Data.CardKind(i % 37));
-                if (!isLizhi && Random.Range(i, 40) == 39)
-                {
-                    isLizhi = true;
-                    AddCard(newCard, true);
-                }
-                else
-                {
-                    AddCard(newCard, false);
-                }
-            }
         }
         public Vector3 GetLastCardRightBorder()
         {

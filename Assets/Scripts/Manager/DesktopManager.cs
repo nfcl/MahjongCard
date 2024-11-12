@@ -2,6 +2,9 @@ using Card;
 using Data;
 using GameLogic;
 using GameSceneUI;
+using System;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DesktopManager : MonoBehaviour
@@ -24,22 +27,39 @@ public class DesktopManager : MonoBehaviour
 
     #endregion
 
+    public void OnPlayerRound(int index)
+    {
+        int relativeIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(index);
+        playerInfoItems.Foreach((_, index) => _.SetWaitBarState(index == relativeIndex));
+    }
+    public void ClearDesktop()
+    {
+        for (int i = 0; i < paiHes.Length; ++i)
+        {
+            paiHes[i].Clear();
+        }
+        for (int i = 0; i < handCards.Length; ++i)
+        {
+            handCards[i].Clear();
+        }
+    }
     public void SyncScore(int[] messages)
     {
         for (int i = 0; i < messages.Length; ++i)
         {
-            playerInfoItems[i].ShowRes(messages[IGameLogicManager.instance.GetplayerIndex(i)]);
+            playerInfoItems[i].ShowRes(messages[IGameLogicManager.instance.GetRelativeplayerIndex(i)]);
         }
     }
-    public void SyncRound(FengKind round, int ju)
+    public void SyncRound(FengKind feng, int ju)
     {
         int zhuang = IGameLogicManager.instance.GetZhuangPlayerIndex();
+        int zhuangRelative = IGameLogicManager.instance.GetAbsolutePlayerIndex(zhuang);
         for (int i = 0; i < DataManager.playerNum; ++i)
         {
-            int feng = (zhuang + i) % DataManager.playerNum;
-            playerInfoItems[feng].SetFeng((FengKind)i);
+            int temp = (zhuangRelative + i) % DataManager.playerNum;
+            playerInfoItems[temp].SetFeng((FengKind)i);
         }
-        changInfoText.text = $"{round.toString()}{ju}¾Ö";
+        changInfoText.text = $"{feng.toString()}{ju}¾Ö";
     }
 
     private void Awake()

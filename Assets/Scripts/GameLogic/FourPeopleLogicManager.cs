@@ -5,28 +5,17 @@ using UnityEngine;
 
 namespace GameLogic
 {
-    public class FourPeopleLogicManager : NetworkBehaviour, IGameLogicManager
+    public class FourPeopleLogicManager : NetworkBehaviour
     {
         public LogicPaiShan paiShan;
         public LogicPlayer[] players;
         public (FengKind feng, int ju, int chang) round;
         public int currentPlayerIndex;
         public LogicPlayer currentPlayer => players[currentPlayerIndex];
+        public int liZhiNum;
 
         public Wait<Action> wait;
 
-        public virtual void GameStart()
-        {
-            throw new System.NotImplementedException();
-        }
-        public virtual int GetplayerIndex(int index)
-        {
-            throw new System.NotImplementedException();
-        }
-        public virtual int GetZhuangPlayerIndex()
-        {
-            throw new System.NotImplementedException();
-        }
         /// <summary>
         /// 游戏开始事件
         /// </summary>
@@ -39,6 +28,8 @@ namespace GameLogic
             {
                 players[i] = new LogicPlayer(5, 20, 35000);
             }
+
+            liZhiNum = 0;
         }
         /// <summary>
         /// 一轮游戏开始事件

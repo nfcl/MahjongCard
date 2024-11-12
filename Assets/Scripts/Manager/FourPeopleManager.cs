@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine;
-using JetBrains.Annotations;
 
 namespace Manager
 {
-    public class FourPeopleManager : FourPeopleLogicManager
+    public class FourPeopleManager : FourPeopleLogicManager, IGameLogicManager
     {
         public int roomIndex;
 
@@ -19,13 +18,17 @@ namespace Manager
             IGameLogicManager.instance = this;
         }
 
-        public override int GetplayerIndex(int index)
+        public int GetRelativeplayerIndex(int index)
         {
             return (roomIndex + index) % DataManager.playerNum;
         }
-        public override int GetZhuangPlayerIndex()
+        public int GetZhuangPlayerIndex()
         {
-            return DataManager.playerNum - roomIndex;
+            return round.ju - 1;
+        }
+        public int GetAbsolutePlayerIndex(int index)
+        {
+            return (DataManager.playerNum + index - roomIndex) % DataManager.playerNum;
         }
 
         #region 信息同步
@@ -56,8 +59,19 @@ namespace Manager
         [ClientRpc]
         public void RpcSyncRound(FengKind round, int ju, int chang)
         {
+            if (!isServer)
+            {
+                base.round = (round, ju, chang);
+            }
+            DesktopManager.instance.SyncRound(base.round.feng, base.round.ju);
+            GameSceneUIManager.instance.gamePanel.SyncChang(base.round.chang);
+            DesktopManager.instance.OnPlayerRound(base.round.ju - 1);
             Debug.Log($"ZhuangIndex : {GetZhuangPlayerIndex()}");
-            DesktopManager.instance.SyncRound(round, ju);
+        }
+        [ClientRpc]
+        public void RpcSyncLiZhi(int liZhi)
+        {
+            GameSceneUIManager.instance.gamePanel.SyncLiZhiNum(liZhi);
         }
 
         #endregion
@@ -65,7 +79,7 @@ namespace Manager
         #region 总的游戏开始，玩家刚进入场景
 
         [Server]
-        public override void GameStart()
+        public void GameStart()
         {
             OnGameStart();
         }
@@ -76,8 +90,6 @@ namespace Manager
 
             RpcSyncIndex(DataManager.roomIndexToPlayers.Select((_) => _.uuid).ToArray());
             RpcSyncName(DataManager.roomIndexToPlayers.Select((_) => _.name).ToArray());
-            RpcSyncScore(players.Select((_) => _.res).ToArray());
-            RpcSyncRound(round.feng, round.ju, round.chang);
 
             RpcClientGameStart();
 
@@ -99,19 +111,39 @@ namespace Manager
         [Server]
         public void GameRoundStart()
         {
-            base.OnGameRoundStart();
+            OnGameRoundStart();
         }
         [Server]
         public override void OnGameRoundStart()
         {
             base.OnGameRoundStart();
 
+            RpcSyncScore(players.Select((_) => _.res).ToArray());
+            RpcSyncRound(round.feng, round.ju, round.chang);
+            RpcSyncLiZhi(liZhiNum);
 
+            RpcClientGameRoundStart();
         }
         [ClientRpc]
         public void RpcClientGameRoundStart()
         {
+            DesktopManager.instance.ClearDesktop();
+            GameSceneUIManager.instance.gamePanel.handCard.Clear();
+        }
 
+        #endregion
+
+        #region 玩家配牌
+
+        [Server]
+        public void ConfigurCards()
+        {
+            OnConfigurCard();
+        }
+        [Server]
+        public override void OnConfigurCard()
+        {
+            base.OnConfigurCard();
         }
 
         #endregion
@@ -130,5 +162,14 @@ public static class LinqExtension
             index += 1;
         }
         return index;
+    }
+    public static void Foreach<T>(this IEnumerable<T> items, Action<T, int> action)
+    {
+        int index = 0;
+        foreach (var item in items)
+        {
+            action(item, index);
+            index += 1;
+        }
     }
 }
