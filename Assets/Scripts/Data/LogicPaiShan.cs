@@ -11,13 +11,27 @@ namespace Data
 
         public LogicPaiShan()
         {
-            cards = new CardKind[37 * 4];
+            cards = new CardKind[34 * 4];
+            int num = 0;
             for (int i = 0; i < 37; ++i)
             {
-                cards[i + 37 * 0] = new CardKind(i);
-                cards[i + 37 * 1] = new CardKind(i);
-                cards[i + 37 * 2] = new CardKind(i);
-                cards[i + 37 * 3] = new CardKind(i);
+                if (i == 0 || i == 10 || i == 20)
+                {
+                    cards[num++] = new CardKind(i);
+                }
+                else if (i == 5 || i == 15 || i == 25)
+                {
+                    cards[num++] = new CardKind(i);
+                    cards[num++] = new CardKind(i);
+                    cards[num++] = new CardKind(i);
+                }
+                else
+                {
+                    cards[num++] = new CardKind(i);
+                    cards[num++] = new CardKind(i);
+                    cards[num++] = new CardKind(i);
+                    cards[num++] = new CardKind(i);
+                }
             }
             lingShang = 0;
             baoPai = 0;
