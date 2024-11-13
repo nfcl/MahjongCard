@@ -122,3 +122,93 @@ WaitPlayer有OnComplete和OnOutTime两种方法向Wait提交数据，前者由�
 为了保证不会产生过时的提交（预想中Wait只在逻辑处理器中有一个，如果后面保持这种模式的话，可能会产生信号差的客户端在过一段时间后提交数据给新的Wait实例的情况），我为Wait设置了一个UUID，到时候会在给客户端发送选择时将这个UUID也发过去，这样提交时只需将UUID进行对比即可筛选掉。
 
 好，就是这样，嘻
+
+#### 2024年11月14日
+
+依旧是这个点...
+
+今天把倒计时和玩家选择的逻辑大致实现了一下。
+
+目前将其分为：Choice 和 Action。
+
+服务端在玩家进行了某些操作（如抽牌和打牌）后，在逻辑处理器计算每位玩家可能的操作Choice并集合在一个数组发送给对应的玩家。
+
+这个Choice数组将由客户端UI表达，玩家选择了某个Choice后会生成Action数据提交给服务端，再由服务端统一提交给Wait的OnComplete回调完成一次玩家操作。
+
+今天发现的一个比较严重的疏忽是所有的Mirror网络数据类的自定义序列化方法因为读写器类型没有加this前缀导致Weaver根本没有使用这些方法而是自动生成的方法（因为都是由基础类型组合的）。
+
+发现这个问题还是因为ChoicePlayCard是继承自Choice类的。
+
+```C#
+
+    public class Choice
+    {
+        public ChoiceKind kind;
+
+        public Choice()
+        {
+            kind = ChoiceKind.None;
+        }
+        public Choice(ChoiceKind kind)
+        {
+            this.kind = kind;
+        }
+    }
+    public class ChoicePlayCard : Choice
+    {
+        public bool isWhite;
+        public CardKind[] cards;
+
+        public ChoicePlayCard() : base(ChoiceKind.PlayCard) { }
+
+        public static ChoicePlayCard NormalPlayCard()
+        {
+            return new ChoicePlayCard()
+            {
+                cards = new CardKind[0],
+                isWhite = false,
+            };
+        }
+    }
+
+```
+
+而为了在Mirror中实现派生类转换为基类后进行数据交互，我们需要在序列化方法中提前指明该基类实例是由什么派生类转换来的
+
+```
+
+    public static void WriteChoice(this NetworkWriter writer, Choice choice)
+    {
+        writer.Write<ChoiceKind>(choice.kind);
+        Debug.Log(choice.kind);
+        switch (choice.kind)
+        {
+            case ChoiceKind.PlayCard:
+                ChoicePlayCard total = choice as ChoicePlayCard;
+                writer.WriteBool(total.isWhite);
+                writer.WriteArray(total.cards);
+                Debug.Log($"{total.isWhite} {CardKind.ToString(total.cards)}");
+                break;
+        }
+    }
+    public static Choice ReadChoice(this NetworkReader reader)
+    {
+        ChoiceKind kind = reader.Read<ChoiceKind>();
+        Debug.Log(kind);
+        switch (kind)
+        {
+            case ChoiceKind.PlayCard:
+                ChoicePlayCard choicePlayCard = new ChoicePlayCard
+                {
+                    isWhite = reader.ReadBool(),
+                    cards = reader.ReadArray<CardKind>(),
+                };
+                Debug.Log($"{choicePlayCard.isWhite} {CardKind.ToString(choicePlayCard.cards)}");
+                return choicePlayCard;
+        }
+        return new Choice();
+    }
+
+```
+
+这样在接受时也可以得到派生类的信息进行构造。但是在实际中我发现得到的派生类实例永远都是null，因此我怀疑序列化方法有问题。在尝试打Log信息后我发现序列化方法根本没被调用，对比文档后我才发现读写器忘记加this前缀了，加上后序列化方法即可正常被调用了。
