@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine;
+using System.Text;
+using Message;
 
 namespace Manager
 {
@@ -73,6 +75,22 @@ namespace Manager
         {
             GameSceneUIManager.instance.gamePanel.SyncLiZhiNum(liZhi);
         }
+        [ClientRpc]
+        public void RpcSyncConfigurCard(CardsMessage[] cards)
+        {
+            Debug.Log($"\n{CardsMessage.ToString(cards)}");
+            cards.Foreach((_, index) =>
+            {
+                if (index == roomIndex)
+                {
+                    GameSceneUIManager.instance.gamePanel.handCard.ConfigurInitialHandCard(_.cards);
+                }
+                else
+                {
+                    DesktopManager.instance.handCards[GetAbsolutePlayerIndex(index)].ConfigurCard(_.cards);
+                }
+            });
+        }
 
         #endregion
 
@@ -123,6 +141,8 @@ namespace Manager
             RpcSyncLiZhi(liZhiNum);
 
             RpcClientGameRoundStart();
+
+            ConfigurCards();
         }
         [ClientRpc]
         public void RpcClientGameRoundStart()
@@ -144,6 +164,12 @@ namespace Manager
         public override void OnConfigurCard()
         {
             base.OnConfigurCard();
+            
+            CardsMessage[] cards = base.players.Select((_) => new CardsMessage { cards = _.hand.Cards }).ToArray();
+
+            Debug.Log(CardsMessage.ToString(cards));
+
+            RpcSyncConfigurCard(cards);
         }
 
         #endregion

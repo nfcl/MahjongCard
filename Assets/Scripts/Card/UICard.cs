@@ -13,6 +13,14 @@ namespace Card
         public Image cardBack;
         public Image moveShining;
 
+        public bool isBao
+        {
+            set
+            {
+                moveShining.gameObject.SetActive(value);
+            }
+        }
+
         public bool isInteractable = false;
         public bool isDrag = false;
         public CardKind faceKind;
@@ -35,6 +43,8 @@ namespace Card
 
             cardFace.sprite = DataManager.GetUICardFaceSprite(faceKind);
             cardBack.sprite = DataManager.handBackSprites[0];
+
+            isBao = kind.isBao;
         }
         public void DoDraw()
         {
@@ -42,8 +52,7 @@ namespace Card
             cardFace.transform.localPosition += new Vector3(0, 50, 0);
             DOTween.Sequence()
                 .AppendInterval(DataManager.uiHandCardConfigurDrawPauseDuration)
-                .Append(cardFace.transform.DOLocalMove(Vector3.zero, DataManager.uiHandCardConfigurDrawMoveDuration))
-                .AppendCallback(() => { isInteractable = true; });
+                .Append(cardFace.transform.DOLocalMove(Vector3.zero, DataManager.uiHandCardConfigurDrawMoveDuration));
         }
         public void CalculateDragCardPosition(Vector3 pointerPosition)
         {

@@ -6,6 +6,7 @@ namespace Data
     public class LogicHandCard
     {
         private List<CardKind> cards;
+        public CardKind[] Cards => cards.ToArray();
         public CardKind lastDrewCard;
 
         public LogicHandCard()

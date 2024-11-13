@@ -1,10 +1,30 @@
+using Data;
+using Mirror;
 using System;
+using System.Text;
+using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Data
 {
-    public struct CardKind :IComparable<CardKind>
+    public struct CardKind : IComparable<CardKind>
     {
         public int value;
+
+        public bool isHongBao
+        {
+            get
+            {
+                return value == 0 || value == 10 || value == 20;
+            }
+        }
+        public bool isBao
+        {
+            get
+            {
+                return isHongBao;
+            }
+        }
 
         public CardKind(int kind)
         {
@@ -13,14 +33,21 @@ namespace Data
 
         public static bool operator ==(CardKind self, CardKind other)
         {
-            return self.value == other.value;
+            return Equals(self, other);
         }
         public static bool operator !=(CardKind self, CardKind other)
         {
-            return self.value != other.value;
+            return Equals(self, other);
         }
         public override bool Equals(object obj)
         {
+            if (obj == null)
+
+                return false;
+
+            if (GetType() != obj.GetType())
+                return false;
+
             return value == ((CardKind)obj).value;
         }
         public override int GetHashCode()
@@ -40,6 +67,46 @@ namespace Data
                 < 30 => $"{value - 20}s",
                 _ => $"{value - 30}z",
             };
+        }
+        public static string ToString(CardKind[] kinds)
+        {
+            if (kinds == null)
+            {
+                return "null";
+            }
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var _ in kinds)
+                {
+                    sb.Append($"{_.value}\t");
+                }
+                return sb.ToString();
+            }
+            catch
+            {
+                return "null";
+            }
+        }
+        public static string ToString(CardKind[][] kindss)
+        {
+            if (kindss == null)
+            {
+                return "null";
+            }
+            StringBuilder sb = new StringBuilder();
+            foreach (var _ in kindss)
+            {
+                if (_ == null)
+                {
+                    sb.Append("null\n");
+                }
+                else
+                {
+                    sb.Append($"{ToString(_)}\n");
+                }
+            }
+            return sb.ToString();
         }
 
         public static CardKind GetRandomKind()
@@ -64,5 +131,17 @@ namespace Data
                 return order[x.value] - order[y.value];
             }
         }
+    }
+}
+
+public static class CardKindSerializer
+{
+    public static void Writer(NetworkWriter writer, CardKind kind)
+    {
+        writer.WriteInt(kind.value);
+    }
+    public static CardKind Read(NetworkReader reader)
+    {
+        return new CardKind(reader.ReadInt());
     }
 }

@@ -38,10 +38,10 @@ namespace Card
             }
             cards = new List<UICard>();
         }
-        public Sequence ConfigurInitialHandCard(CardKind[] kinds)
+        public void ConfigurInitialHandCard(CardKind[] kinds)
         {
             Sequence sequence = DOTween.Sequence();
-            for(int i = 0; i < kinds.Length; i += DataManager.uiHandCardConfigurPerGroupCount)
+            for (int i = 0; i < kinds.Length; i += DataManager.uiHandCardConfigurPerGroupCount)
             {
                 int startIndex = i;
                 sequence
@@ -55,15 +55,17 @@ namespace Card
                     })
                     .AppendInterval(DataManager.uiHandCardConfigurGroupAppearDuration);
             }
-            return sequence
-                    .AppendCallback(() =>
+            sequence
+                .AppendCallback(() =>
+                {
+                    cards.Sort((x, y) => CardKind.LogicComparer.Compare(x.faceKind, y.faceKind));
+                    for (int i = 0; i < cards.Count; ++i)
                     {
-                        cards.Sort((x, y) => CardKind.LogicComparer.Compare(x.faceKind, y.faceKind));
-                        for (int i = 0; i < cards.Count; ++i)
-                        {
-                            MoveCard(cards[i], i);
-                        }
-                    });
+                        MoveCard(cards[i], i);
+                    }
+                })
+                .AppendInterval(0.1f)
+                .AppendCallback(() => cards.ForEach(_ => _.isInteractable = true));
         }
         public Vector3 GetExceptNormalCardPosition(int index)
         {

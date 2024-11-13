@@ -40,7 +40,7 @@ namespace Card
         {
             faceKind = kind;
             face.sprite = DataManager.GetCardFaceSprite(faceKind);
-            isBao = false;
+            isBao = kind.isBao;
         }
         public void Init(PaiHe paiHe, bool isLiZhi, bool isHide)
         {

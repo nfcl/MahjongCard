@@ -39,6 +39,33 @@ namespace Card
             //}
             //DrawCard(new CardKind(13));
         }
+        public void ConfigurCard(CardKind[] kinds)
+        {
+            Sequence sequence = DOTween.Sequence();
+            for (int i = 0; i < kinds.Length; i += DataManager.uiHandCardConfigurPerGroupCount)
+            {
+                int startIndex = i;
+                sequence
+                    .AppendCallback(() =>
+                    {
+                        for (int k = 0; k < Mathf.Min(DataManager.uiHandCardConfigurPerGroupCount, kinds.Length - startIndex); ++k)
+                        {
+                            int tempIndex = startIndex + k;
+                            DrawCard(kinds[tempIndex]);
+                        }
+                    })
+                    .AppendInterval(DataManager.uiHandCardConfigurGroupAppearDuration);
+            }
+            sequence
+                .AppendCallback(() =>
+                {
+                    this.cards.Sort((x, y) => CardKind.LogicComparer.Compare(x.faceKind, y.faceKind));
+                    for (int i = 0; i < this.cards.Count; ++i)
+                    {
+                        MoveCard(this.cards[i], i);
+                    }
+                });
+        }
         public void Clear()
         {
             while (transform.childCount > 0)
@@ -66,7 +93,7 @@ namespace Card
         {
             Vector3 destPosition = DataManager.handCardStartPosition + dest * DataManager.handCardNormalDistance;
             float length = Vector3.Distance(card.transform.localPosition, destPosition);
-            card.transform.DOLocalMove(destPosition, length * DataManager.handCardMoveSpeed);
+            card.transform.DOLocalMove(destPosition, 0.1f);
         }
         public void FormatCard()
         {

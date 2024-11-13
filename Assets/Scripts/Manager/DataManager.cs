@@ -149,7 +149,6 @@ public class DataManager : MonoBehaviour
     public static Vector3 handCardStartPosition = new Vector3(0, 0.23f, -0.1f);
     public static Vector3 handCardNormalDistance = new Vector3(0.265f, 0, 0);
     public static Vector3 handCardNewDistance = new Vector3(0.47f, 0, 0);
-    public static float handCardMoveSpeed = 1;
 
     public static Vector2 GetChunkLimit(int chunkIndex)
     {

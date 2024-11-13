@@ -24,7 +24,8 @@ public class BMFontEditor : EditorWindow
 	{
 	}
 
-	void OnGUI()
+    [System.Obsolete]
+    void OnGUI()
 	{
 		targetFont = EditorGUILayout.ObjectField("Target Font", targetFont, typeof(Font), false) as Font;
 		fntData = EditorGUILayout.ObjectField("Fnt Data", fntData, typeof(TextAsset), false) as TextAsset;

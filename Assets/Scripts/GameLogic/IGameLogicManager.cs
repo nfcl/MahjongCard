@@ -1,4 +1,6 @@
-﻿namespace GameLogic
+﻿using Mirror;
+
+namespace GameLogic
 {
     public interface IGameLogicManager
     {
@@ -6,6 +8,7 @@
         /// <summary>
         /// 整局游戏开始
         /// </summary>
+        [Server]
         public void GameStart();
         /// <summary>
         /// 获得离客户端玩家相对Index玩家的下标
