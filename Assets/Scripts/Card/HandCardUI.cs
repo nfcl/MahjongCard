@@ -1,6 +1,8 @@
 using Data;
 using DG.Tweening;
+using GameLogic;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Card
@@ -29,6 +31,18 @@ namespace Card
             //    {
             //        DrawCard(CardKind.GetRandomKind(), true);
             //    });
+        }
+        public void BanCard(ChoicePlayCard choice)
+        {
+            HashSet<CardKind> set = choice.cards.ToHashSet();
+            cards.ForEach(_ => _.IsInteractable = set.Contains(_.faceKind) == choice.isWhite);
+        }
+        public void SyncBaoPai()
+        {
+            foreach(UICard card in cards)
+            {
+                card.isBao = IGameLogicManager.instance.isBaoPai(card.faceKind);
+            }
         }
         public void Clear()
         {

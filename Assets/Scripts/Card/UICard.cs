@@ -12,6 +12,7 @@ namespace Card
         public Image cardFace;
         public Image cardBack;
         public Image moveShining;
+        public static (Color32 yes, Color32 no) stateColor = (new Color32(255, 255, 255, 255), new Color32(128, 128, 128, 255));
 
         public bool isBao
         {
@@ -22,6 +23,20 @@ namespace Card
         }
 
         public bool isInteractable = false;
+        public bool IsInteractable
+        {
+            set
+            {
+                isInteractable = value;
+                cardFace.color = value ? stateColor.yes : stateColor.no;
+                cardBack.color = cardFace.color;
+                if (!isInteractable && isDrag)
+                {
+                    isDrag = false;
+                    transform.localPosition = GameSceneUIManager.instance.gamePanel.handCard.GetExceptNormalCardPosition(handIndex);
+                }
+            }
+        }
         public bool isDrag = false;
         public CardKind faceKind;
         public int handIndex;
@@ -71,7 +86,7 @@ namespace Card
         }
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (!isInteractable)
+            if (!isInteractable || isDrag)
             {
                 return;
             }
@@ -89,6 +104,8 @@ namespace Card
             }
             isDrag = false;
             transform.localPosition = GameSceneUIManager.instance.gamePanel.handCard.GetExceptNormalCardPosition(handIndex);
+            GameSceneUIManager.instance.gamePanel.lastCard = this;
+            GameSceneUIManager.instance.gamePanel.SubmitAction(new ActionPlayCard(faceKind));
             isInteractable = true;
         }
     }

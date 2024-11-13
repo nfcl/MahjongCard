@@ -34,7 +34,7 @@ namespace Data
                 }
             }
             lingShang = 0;
-            baoPai = 0;
+            baoPai = 1;
             drawCard = 0;
             Randomize();
         }

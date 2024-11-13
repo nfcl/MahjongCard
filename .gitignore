@@ -81,3 +81,4 @@ crashlytics-build.properties
 /Assets/Adaptive Performance/Settings
 *.conf
 /Assets/StreamingAssets/db.db
+/Assets/outSprite/Font/number/number

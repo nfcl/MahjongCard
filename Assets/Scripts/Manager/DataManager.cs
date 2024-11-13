@@ -115,6 +115,10 @@ public class DataManager : MonoBehaviour
             info.Value.isReady = false;
         }
     }
+    public static NetworkConnectionToClient GetRoomPlayerConnection(int index)
+    {
+        return roomPlayerInfos.Where(_ => _.Value.uuid == roomIndexToPlayers[index].uuid).First().Key;
+    }
 
     private static int clientSceneChangedNum = 0;
     public static int ClientSceneChangedNum { get { return clientSceneChangedNum; } }

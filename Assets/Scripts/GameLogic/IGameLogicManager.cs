@@ -1,4 +1,5 @@
-﻿using Mirror;
+﻿using Data;
+using Mirror;
 
 namespace GameLogic
 {
@@ -26,5 +27,16 @@ namespace GameLogic
         /// <param name="index"></param>
         /// <returns></returns>
         public int GetAbsolutePlayerIndex(int index);
+        /// <summary>
+        /// 判断是不是宝牌
+        /// </summary>
+        /// <param name="kind"></param>
+        /// <returns></returns>
+        public bool isBaoPai(CardKind kind);
+        /// <summary>
+        /// 客户端提交操作
+        /// </summary>
+        /// <param name="action"></param>
+        public void SubmitAction(Action action);
     }
 }

@@ -9,6 +9,12 @@ namespace Message
     {
         public CardKind[] cards;
 
+        public CardsMessage() { }
+        public CardsMessage(CardKind[] cards)
+        {
+            this.cards = cards;
+        }
+
         public override string ToString()
         {
             return CardKind.ToString(cards);
@@ -35,6 +41,11 @@ namespace Message
             return sb.ToString();
         }
     }
+    public class DrawCardMessage
+    {
+        public int playerIndex;
+        public CardKind card;
+    }
 }
 
 public static class MessageSerializer
@@ -46,5 +57,18 @@ public static class MessageSerializer
     public static CardsMessage ReadCardsMessage(NetworkReader reader)
     {
         return new CardsMessage { cards = reader.ReadArray<CardKind>() };
+    }
+    public static void WriteDrawCardMessage(NetworkWriter writer, DrawCardMessage message)
+    {
+        writer.WriteInt(message.playerIndex);
+        writer.Write<CardKind>(message.card);
+    }
+    public static DrawCardMessage ReadDrawCardMessage(NetworkReader reader)
+    {
+        return new DrawCardMessage
+        {
+            playerIndex = reader.ReadInt(),
+            card = reader.Read<CardKind>()
+        };
     }
 }

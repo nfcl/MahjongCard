@@ -13,7 +13,7 @@ public class BaoPaiItem : MonoBehaviour
     }
     public void ShowBaoPai(CardKind kind)
     {
-        face.sprite = DataManager.GetCardFaceSprite(kind);
+        face.sprite = DataManager.GetUICardFaceSprite(kind);
         back.sprite = DataManager.handBackSprites[0];
     }
 }

@@ -1,9 +1,8 @@
 using Data;
+using GameLogic;
 using Mirror;
 using System;
 using System.Text;
-using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Data
 {
@@ -11,20 +10,11 @@ namespace Data
     {
         public int value;
 
-        public bool isHongBao
-        {
-            get
-            {
-                return value == 0 || value == 10 || value == 20;
-            }
-        }
-        public bool isBao
-        {
-            get
-            {
-                return isHongBao;
-            }
-        }
+        public bool isFengPai => 30 <= value && value < 33;
+        public bool isSanyuanPai => 33 <= value && value < 37;
+        public bool isZiPai => 30 <= value && value < 37;
+        public bool isHongBao => value == 0 || value == 10 || value == 20;
+        public bool isBao => isHongBao || IGameLogicManager.instance.isBaoPai(this);
 
         public CardKind(int kind)
         {

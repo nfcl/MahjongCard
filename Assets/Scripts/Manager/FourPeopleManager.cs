@@ -6,15 +6,23 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine;
-using System.Text;
 using Message;
+using DG.Tweening;
+using System.Text;
 
 namespace Manager
 {
     public class FourPeopleManager : FourPeopleLogicManager, IGameLogicManager
     {
         public int roomIndex;
-
+        private bool[] baoPaiList;
+        private int[] baoPaiMap = new int[]
+        {
+             6, 2, 3, 4, 5, 6, 7, 8, 9, 1,
+            16,12,13,14,15,16,17,18,19,11,
+            26,22,23,24,25,26,27,28,29,21,
+            31,32,33,30,35,36,34
+        };
         private void Awake()
         {
             IGameLogicManager.instance = this;
@@ -31,6 +39,35 @@ namespace Manager
         public int GetAbsolutePlayerIndex(int index)
         {
             return (DataManager.playerNum + index - roomIndex) % DataManager.playerNum;
+        }
+        public bool isBaoPai(CardKind kind)
+        {
+            return baoPaiList[kind.value];
+        }
+        public void SubmitAction(Data.Action action)
+        {
+            CmdSubmitAction(roomIndex, action);
+        }
+        [Command(requiresAuthority = false)]
+        public void CmdSubmitAction(int playerIndex, Data.Action action)
+        {
+            StringBuilder actionString = new StringBuilder();
+            actionString.Append($"玩家{playerIndex} : ");
+            switch (action.kind)
+            {
+                case ActionKind.None:
+                    {
+                        actionString.Append("无操作");
+                        break;
+                    }
+                case ActionKind.PlayCard:
+                    {
+                        ActionPlayCard total = action as ActionPlayCard;
+                        actionString.Append($"打出{total.card}");
+                        break;
+                    }
+            }
+            Debug.Log(actionString.ToString());
         }
 
         #region 信息同步
@@ -91,6 +128,18 @@ namespace Manager
                 }
             });
         }
+        [ClientRpc]
+        public void RpcSyncBaoPai(CardsMessage cards)
+        {
+            Debug.Log($"\n包牌 : {cards}");
+
+            foreach(var card in cards.cards)
+            {
+                baoPaiList[baoPaiMap[card.value]] = true;
+            }
+
+            GameSceneUIManager.instance.gamePanel.SyncBaoPai(cards.cards);
+        }
 
         #endregion
 
@@ -149,6 +198,11 @@ namespace Manager
         {
             DesktopManager.instance.ClearDesktop();
             GameSceneUIManager.instance.gamePanel.handCard.Clear();
+
+            baoPaiList = new bool[37];
+            baoPaiList[00] = true;
+            baoPaiList[10] = true;
+            baoPaiList[20] = true;
         }
 
         #endregion
@@ -169,7 +223,60 @@ namespace Manager
 
             Debug.Log(CardsMessage.ToString(cards));
 
+            RpcSyncBaoPai(new CardsMessage(paiShan.GetBaoPai()));
+
             RpcSyncConfigurCard(cards);
+
+            DOTween.Sequence()
+                .AppendInterval(3f)
+                .AppendCallback(() => OnPlayerRoundStart());
+        }
+
+        #endregion
+
+        #region 玩家回合
+
+        [Server]
+        public override void OnPlayerRoundStart()
+        {
+            base.OnPlayerRoundStart();
+
+            RpcPlayerDrawCard(
+                new DrawCardMessage
+                {
+                    card = currentPlayer.LastDrewCard,
+                    playerIndex = currentPlayerIndex
+                }
+            );
+            TargetGivePlayerChoices(
+                DataManager.GetRoomPlayerConnection(currentPlayerIndex),
+                wait.uuid,
+                currentPlayer.roundWaitTime, 
+                currentPlayer.globalWaitTime,
+                new Choice[]
+                {
+                    ChoicePlayCard.NormalPlayCard()
+                }
+            );
+        }
+        [ClientRpc]
+        public void RpcPlayerDrawCard(DrawCardMessage message)
+        {
+            if (message.playerIndex == roomIndex)
+            {
+                GameSceneUIManager.instance.gamePanel.handCard.DrawCard(message.card, true);
+            }
+            else
+            {
+                DesktopManager.instance.handCards[GetAbsolutePlayerIndex(message.playerIndex)].DrawCard(message.card);
+            }
+        }
+        [TargetRpc]
+        public void TargetGivePlayerChoices(NetworkConnectionToClient connection, long uuid, float roundTime, float globalTime, Choice[] choices)
+        {
+            GameSceneUIManager.instance.gamePanel.InitChoices(uuid, choices);
+            Debug.Log($"倒计时{roundTime}+{globalTime}秒启动");
+            GameSceneUIManager.instance.gamePanel.SetAlarm(roundTime, globalTime);
         }
 
         #endregion

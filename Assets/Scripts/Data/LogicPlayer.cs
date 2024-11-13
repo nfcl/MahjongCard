@@ -7,6 +7,7 @@
         public LogicMingPai ming;
         public float roundWaitTime;
         public float globalWaitTime;
+        public float totalWaitTime => roundWaitTime + globalWaitTime;
         public CardKind LastDrewCard => hand.lastDrewCard;
         public int res;
 
