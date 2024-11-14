@@ -83,7 +83,6 @@ namespace Manager
             }
             DesktopManager.instance.SyncRound(base.round.feng, base.round.ju);
             GameSceneUIManager.instance.gamePanel.SyncChang(base.round.chang);
-            DesktopManager.instance.OnPlayerRound(base.round.ju - 1);
             Debug.Log($"ZhuangIndex : {GetZhuangPlayerIndex()}");
         }
         [ClientRpc]
@@ -275,6 +274,8 @@ namespace Manager
 
             RpcSyncLastCardNum(paiShan.LastDrawCardCount);
 
+            RpcOnPlayerRound(currentPlayerIndex);
+
             TargetGivePlayerChoices(
                 DataManager.GetRoomPlayerConnection(currentPlayerIndex),
                 wait.uuid,
@@ -285,6 +286,11 @@ namespace Manager
                     ChoicePlayCard.NormalPlayCard()
                 }
             );
+        }
+        [ClientRpc]
+        public void RpcOnPlayerRound(int playerIndex)
+        {
+            DesktopManager.instance.OnPlayerRound(playerIndex);
         }
         [ClientRpc]
         public void RpcPlayerDrawCard(DrawCardMessage message)
@@ -308,6 +314,9 @@ namespace Manager
         {
             base.OnPlayerPlayCard(player, card, isLiZhi);
             RpcPlayerPlayCard(player.playerIndex, card, isLiZhi);
+
+            OnPlayerRoundEnd(player);
+
         }
         [ClientRpc]
         public void RpcPlayerPlayCard(int playerIndex, CardKind card, bool isLiZhi)
@@ -321,6 +330,19 @@ namespace Manager
             {
                 DesktopManager.instance.OnPlayerPlayCard(playerIndex, card, isLiZhi);
             }
+        }
+
+        #endregion
+
+        #region 玩家回合结束
+
+        public override void OnPlayerRoundEnd(LogicPlayer player)
+        {
+            base.OnPlayerRoundEnd(player);
+            DOTween.Sequence().AppendInterval(2).AppendCallback(() =>
+            {
+                OnPlayerRoundStart();
+            });
         }
 
         #endregion

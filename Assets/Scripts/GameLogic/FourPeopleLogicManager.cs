@@ -16,6 +16,11 @@ namespace GameLogic
 
         public Wait<Action> wait;
 
+        public void NextPlayer()
+        {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
+        }
+
         /// <summary>
         /// 游戏开始事件
         /// </summary>
@@ -103,6 +108,11 @@ namespace GameLogic
         public virtual void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
             player.PlayCard(card);
+        }
+
+        public virtual void OnPlayerRoundEnd(LogicPlayer player)
+        {
+            NextPlayer();
         }
     }
 }
