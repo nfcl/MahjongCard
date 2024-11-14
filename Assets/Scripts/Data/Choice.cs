@@ -53,21 +53,18 @@ public static class ChoiceSerializer
     public static void WriteChoice(this NetworkWriter writer, Choice choice)
     {
         writer.Write<ChoiceKind>(choice.kind);
-        Debug.Log(choice.kind);
         switch (choice.kind)
         {
             case ChoiceKind.PlayCard:
                 ChoicePlayCard total = choice as ChoicePlayCard;
                 writer.WriteBool(total.isWhite);
                 writer.WriteArray(total.cards);
-                Debug.Log($"{total.isWhite} {CardKind.ToString(total.cards)}");
                 break;
         }
     }
     public static Choice ReadChoice(this NetworkReader reader)
     {
         ChoiceKind kind = reader.Read<ChoiceKind>();
-        Debug.Log(kind);
         switch (kind)
         {
             case ChoiceKind.PlayCard:
@@ -76,7 +73,6 @@ public static class ChoiceSerializer
                     isWhite = reader.ReadBool(),
                     cards = reader.ReadArray<CardKind>(),
                 };
-                Debug.Log($"{choicePlayCard.isWhite} {CardKind.ToString(choicePlayCard.cards)}");
                 return choicePlayCard;
         }
         return new Choice();

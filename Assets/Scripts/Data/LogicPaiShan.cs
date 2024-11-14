@@ -9,12 +9,17 @@ namespace Data
         private int baoPai;
         private int drawCard;
 
+        public int LastDrawCardCount => 34 * 4 - 14 - (drawCard + lingShang);
+        public bool IsDrawEnd => LastDrawCardCount == 0;
+        public bool CanLiZhi => LastDrawCardCount >= 4;
+        public bool CanGang => LastDrawCardCount > 0;
+
         public LogicPaiShan()
         {
             cards = new CardKind[34 * 4];
             int num = 0;
             for (int i = 0; i < 37; ++i)
-            {
+            {   
                 if (i == 0 || i == 10 || i == 20)
                 {
                     cards[num++] = new CardKind(i);
@@ -105,22 +110,6 @@ namespace Data
         public CardKind GetDrawCard()
         {
             return cards[drawCard++];
-        }
-        public int LastDrawCardCount()
-        {
-            return 37 * 4 - 14 - (drawCard + lingShang);
-        }
-        public bool IsDrawEnd()
-        {
-            return LastDrawCardCount() == 0;
-        }
-        public bool CanLiZhi()
-        {
-            return LastDrawCardCount() >= 4;
-        }
-        public bool CanGang()
-        {
-            return LastDrawCardCount() > 0;
         }
     }
 }

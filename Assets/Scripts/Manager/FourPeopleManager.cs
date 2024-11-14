@@ -110,7 +110,7 @@ namespace Manager
         [ClientRpc]
         public void RpcSyncBaoPai(CardsMessage cards)
         {
-            Debug.Log($"\n包牌 : {cards}");
+            Debug.Log($"\n宝牌 : {cards}");
 
             foreach(var card in cards.cards)
             {
@@ -118,6 +118,11 @@ namespace Manager
             }
 
             GameSceneUIManager.instance.gamePanel.SyncBaoPai(cards.cards);
+        }
+        [ClientRpc]
+        public void RpcSyncLastCardNum(int lastCardNum)
+        {
+            DesktopManager.instance.lastCardText.text = lastCardNum.ToString("00");
         }
 
         #endregion
@@ -242,6 +247,8 @@ namespace Manager
 
             RpcSyncBaoPai(new CardsMessage(paiShan.GetBaoPai()));
 
+            RpcSyncLastCardNum(paiShan.LastDrawCardCount);
+
             RpcSyncConfigurCard(cards);
 
             DOTween.Sequence()
@@ -265,6 +272,9 @@ namespace Manager
                     playerIndex = currentPlayerIndex
                 }
             );
+
+            RpcSyncLastCardNum(paiShan.LastDrawCardCount);
+
             TargetGivePlayerChoices(
                 DataManager.GetRoomPlayerConnection(currentPlayerIndex),
                 wait.uuid,
