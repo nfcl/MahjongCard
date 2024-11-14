@@ -20,7 +20,7 @@ public static class SqliteUtils
     }
     private static SQLiteConnection GetConnection()
     {
-        string dbPath = UnityEngine.Application.streamingAssetsPath;
+        string dbPath = UnityEngine.Application.persistentDataPath;
         string dbName = "db.db";
         SQLiteConnection conn = null;
         if (!Directory.Exists(dbPath))
