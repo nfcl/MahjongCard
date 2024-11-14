@@ -37,6 +37,6 @@ namespace GameLogic
         /// 客户端提交操作
         /// </summary>
         /// <param name="action"></param>
-        public void SubmitAction(Action action);
+        public void SubmitAction(long uuid, Action action);
     }
 }

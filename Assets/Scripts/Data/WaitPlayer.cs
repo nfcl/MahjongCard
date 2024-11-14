@@ -11,11 +11,13 @@ namespace Data
         private Wait<T>.CompleteSingleEvent onOutTimeEvent;
         public LogicPlayer player;
         public T defaultData;
+        public bool isComplete;
 
         public WaitPlayer(LogicPlayer player, T defaultData)
         {
             this.player = player;
             this.defaultData = defaultData;
+            isComplete = false;
         }
 
         public void Init(Wait<T> wait, int index)
@@ -36,18 +38,23 @@ namespace Data
 
         public void OnComplete(T data)
         {
+            isComplete = true;
             onCompleteEvent?.Invoke(data);
             wait.OnSingleComplete(index, data);
         }
         public void OnOutTime()
         {
+            isComplete = true;
             onOutTimeEvent?.Invoke(defaultData);
             wait.OnSingleComplete(index, defaultData);
         }
         public IEnumerator PlayerOutTimeAlarm()
         {
             yield return new WaitForSecondsRealtime(player.roundWaitTime + player.globalWaitTime + 0.5f);
-            OnOutTime();
+            if (!isComplete)
+            {
+                OnOutTime();
+            }
         }
 
         public static WaitPlayer<T> WaitForPlayerSelect(LogicPlayer player, T defaultData)

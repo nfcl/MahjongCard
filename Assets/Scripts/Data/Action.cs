@@ -17,6 +17,10 @@ namespace Data
         {
             this.kind = kind;
         }
+        public static void ToString(Action[] actions)
+        {
+
+        }
     }
     public class ActionPlayCard : Action
     {

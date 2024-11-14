@@ -23,7 +23,6 @@ namespace Card
         public bool isInteractable;
 
         public long uuid;
-        public UICard lastCard;
 
         private void Awake()
         {
@@ -31,18 +30,28 @@ namespace Card
             uuid = -1;
             SetAlarmText(0, 0);
         }
-
-        public void SubmitAction(Action action)
+        public void SubmitActionPlayCard(UICard card)
         {
-            if(uuid == -1)
+            if (SubmitAction(new ActionPlayCard(card.faceKind)))
             {
-                return;
+                handCard.lastCard = card;
             }
+        }
+        public bool SubmitAction(Action action)
+        {
             long tempUuid = uuid;
             uuid = -1;
+            if (tempUuid == -1)
+            {
+                Debug.Log("客户端UUID未通过检测");
+                return false;
+            }
 
-            IGameLogicManager.instance.SubmitAction(action);
+            ClearAlarm();
 
+            IGameLogicManager.instance.SubmitAction(tempUuid, action);
+
+            return true;
         }
         public void InitChoices(long uuid,  Choice[] choices)
         {

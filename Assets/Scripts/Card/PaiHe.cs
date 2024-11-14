@@ -1,3 +1,4 @@
+using Data;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -91,6 +92,12 @@ namespace Card
                                       : DataManager.paiHeCardNormalHorizentalDistance);
             }
             return result;
+        }
+        public void CreateCard(CardKind kind,bool isLiZhi)
+        {
+            RealCard newCard = RealCard.Create();
+            newCard.Init(kind);
+            AddCard(newCard, isLiZhi);
         }
         public void AddCard(RealCard card, bool isLiZhi)
         {

@@ -12,6 +12,7 @@ namespace Card
         public UICard prefab;
 
         public List<UICard> cards;
+        public UICard lastCard;
 
         private void Awake()
         {
@@ -31,6 +32,21 @@ namespace Card
             //    {
             //        DrawCard(CardKind.GetRandomKind(), true);
             //    });
+        }
+        public void FormatCard()
+        {
+            cards.Foreach((_, index) => MoveCard(_, index));
+        }
+        public void PlayCard(CardKind card)
+        {
+            if (lastCard == null || card != lastCard.faceKind)
+            {
+                lastCard = cards.Where(_ => _.faceKind == card).FirstOrDefault();
+            }
+            cards.Remove(lastCard);
+            DestroyImmediate(lastCard.gameObject);
+            lastCard = null;
+            FormatCard();
         }
         public void BanCard(ChoicePlayCard choice)
         {

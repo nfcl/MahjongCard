@@ -27,6 +27,11 @@ public class DesktopManager : MonoBehaviour
 
     #endregion
 
+    public void OnPlayerPlayCard(int playerIndex, CardKind card, bool isZhi)
+    {
+        int relativeIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(playerIndex);
+        paiHes[relativeIndex].AddCard(handCards[relativeIndex].PlayCard(card), isZhi);
+    }
     public void OnPlayerRound(int index)
     {
         int relativeIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(index);

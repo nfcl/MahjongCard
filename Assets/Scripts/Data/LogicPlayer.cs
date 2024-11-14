@@ -2,6 +2,7 @@
 {
     public class LogicPlayer
     {
+        public int playerIndex;
         public LogicHandCard hand;
         public LogicPaiHe paiHe;
         public LogicMingPai ming;
@@ -11,12 +12,13 @@
         public CardKind LastDrewCard => hand.lastDrewCard;
         public int res;
 
-        public LogicPlayer(float roundWaitTime, float globalWaitTime, int res)
+        public LogicPlayer(int playerIndex, float roundWaitTime, float globalWaitTime, int res)
         {
             hand = null;
             paiHe = null;
             ming = null;
 
+            this.playerIndex = playerIndex;
             this.roundWaitTime = roundWaitTime;
             this.globalWaitTime = globalWaitTime;
             this.res = res;

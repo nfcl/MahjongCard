@@ -44,30 +44,9 @@ namespace Manager
         {
             return baoPaiList[kind.value];
         }
-        public void SubmitAction(Data.Action action)
+        public void SubmitAction(long uuid, Data.Action action)
         {
-            CmdSubmitAction(roomIndex, action);
-        }
-        [Command(requiresAuthority = false)]
-        public void CmdSubmitAction(int playerIndex, Data.Action action)
-        {
-            StringBuilder actionString = new StringBuilder();
-            actionString.Append($"玩家{playerIndex} : ");
-            switch (action.kind)
-            {
-                case ActionKind.None:
-                    {
-                        actionString.Append("无操作");
-                        break;
-                    }
-                case ActionKind.PlayCard:
-                    {
-                        ActionPlayCard total = action as ActionPlayCard;
-                        actionString.Append($"打出{total.card}");
-                        break;
-                    }
-            }
-            Debug.Log(actionString.ToString());
+            CmdSubmitAction(roomIndex, uuid, action);
         }
 
         #region 信息同步
@@ -139,6 +118,44 @@ namespace Manager
             }
 
             GameSceneUIManager.instance.gamePanel.SyncBaoPai(cards.cards);
+        }
+
+        #endregion
+
+        #region 玩家操作
+
+        [TargetRpc]
+        public void TargetGivePlayerChoices(NetworkConnectionToClient connection, long uuid, float roundTime, float globalTime, Choice[] choices)
+        {
+            GameSceneUIManager.instance.gamePanel.InitChoices(uuid, choices);
+            Debug.Log($"倒计时{roundTime}+{globalTime}秒启动");
+            GameSceneUIManager.instance.gamePanel.SetAlarm(roundTime, globalTime);
+        }
+        [Command(requiresAuthority = false)]
+        public void CmdSubmitAction(int playerIndex, long uuid, Data.Action action)
+        {
+            if(uuid != wait.uuid)
+            {
+                Debug.Log($"玩家{playerIndex} : 未通过UUID检测");
+            }
+            StringBuilder actionString = new StringBuilder();
+            actionString.Append($"玩家{playerIndex} : ");
+            switch (action.kind)
+            {
+                case ActionKind.None:
+                    {
+                        actionString.Append("无操作");
+                        break;
+                    }
+                case ActionKind.PlayCard:
+                    {
+                        ActionPlayCard total = action as ActionPlayCard;
+                        actionString.Append($"打出{total.card}");
+                        wait.PlayerComplete(players[playerIndex], action);
+                        break;
+                    }
+            }
+            Debug.Log(actionString.ToString());
         }
 
         #endregion
@@ -271,12 +288,29 @@ namespace Manager
                 DesktopManager.instance.handCards[GetAbsolutePlayerIndex(message.playerIndex)].DrawCard(message.card);
             }
         }
-        [TargetRpc]
-        public void TargetGivePlayerChoices(NetworkConnectionToClient connection, long uuid, float roundTime, float globalTime, Choice[] choices)
+
+        #endregion
+
+        #region 玩家打牌
+
+        [Server]
+        public override void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
-            GameSceneUIManager.instance.gamePanel.InitChoices(uuid, choices);
-            Debug.Log($"倒计时{roundTime}+{globalTime}秒启动");
-            GameSceneUIManager.instance.gamePanel.SetAlarm(roundTime, globalTime);
+            base.OnPlayerPlayCard(player, card, isLiZhi);
+            RpcPlayerPlayCard(player.playerIndex, card, isLiZhi);
+        }
+        [ClientRpc]
+        public void RpcPlayerPlayCard(int playerIndex, CardKind card, bool isLiZhi)
+        {
+            if(roomIndex == playerIndex)
+            {
+                GameSceneUIManager.instance.gamePanel.handCard.PlayCard(card);
+                DesktopManager.instance.paiHes[0].CreateCard(card, isLiZhi);
+            }
+            else
+            {
+                DesktopManager.instance.OnPlayerPlayCard(playerIndex, card, isLiZhi);
+            }
         }
 
         #endregion

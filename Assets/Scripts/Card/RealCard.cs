@@ -46,10 +46,7 @@ namespace Card
         {
             transform.SetParent(paiHe.transform);
             Vector3 newEuler;
-            newEuler = transform.localEulerAngles;
-            newEuler.z = 90;
-            newEuler.y = (isLiZhi ? 90 : 0) + Random.Range(-3.0f, 3.0f);
-            transform.localEulerAngles = newEuler;
+            transform.localEulerAngles = new Vector3(0, (isLiZhi ? 90 : 0) + Random.Range(-3.0f, 3.0f), 90);
             newEuler = shadow.localEulerAngles;
             newEuler.y = 90;
             shadow.localEulerAngles = newEuler;

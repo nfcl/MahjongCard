@@ -119,7 +119,7 @@ namespace Card
         {
             RealCard playCard = cards.Where(_ => _.faceKind == kind).FirstOrDefault();
             cards.Remove(playCard);
-            FormatCard();
+            DOTween.Sequence().AppendInterval(0.5f).AppendCallback(FormatCard);
             return playCard;
         }
     }

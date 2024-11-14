@@ -26,7 +26,7 @@ namespace GameLogic
             players = new LogicPlayer[4];
             for (int i = 0; i < players.Length; ++i)
             {
-                players[i] = new LogicPlayer(5, 20, 35000);
+                players[i] = new LogicPlayer(i, 5, 20, 35000);
             }
 
             liZhiNum = 0;
@@ -72,7 +72,7 @@ namespace GameLogic
                 _ =>
                 {
                     wait = null;
-                    ProcessPlayerSelect(currentPlayer, _[0]);
+                    ProcessPlayerSelect(_[0].Item1, _[0].Item2);
                 }
             );
             wait.AlarmStartAll(this);
@@ -88,7 +88,7 @@ namespace GameLogic
                 case ActionKind.PlayCard:
                     {
                         ActionPlayCard resultAction = action as ActionPlayCard;
-                        OnPlayerPlayCard(player, resultAction.card);
+                        OnPlayerPlayCard(player, resultAction.card, false);
                         break;
                     }
             }
@@ -100,7 +100,7 @@ namespace GameLogic
         /// <summary>
         /// 玩家打出牌
         /// </summary>
-        public virtual void OnPlayerPlayCard(LogicPlayer player, CardKind card)
+        public virtual void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
             player.PlayCard(card);
         }

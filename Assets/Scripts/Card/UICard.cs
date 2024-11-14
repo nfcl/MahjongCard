@@ -103,9 +103,11 @@ namespace Card
                 return;
             }
             isDrag = false;
+            if (this.transform.localPosition.y > 150)
+            {
+                GameSceneUIManager.instance.gamePanel.SubmitActionPlayCard(this);
+            }
             transform.localPosition = GameSceneUIManager.instance.gamePanel.handCard.GetExceptNormalCardPosition(handIndex);
-            GameSceneUIManager.instance.gamePanel.lastCard = this;
-            GameSceneUIManager.instance.gamePanel.SubmitAction(new ActionPlayCard(faceKind));
             isInteractable = true;
         }
     }
