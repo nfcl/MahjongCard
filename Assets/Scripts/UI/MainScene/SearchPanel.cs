@@ -78,6 +78,12 @@ namespace MainSceneUI
         }
         public void Confirm()
         {
+
+            if(selectItem == null)
+            {
+                return;
+            }
+
             try
             {
                 MainSceneUIManager.instance.propPanel.Wait("加入房间ing...");

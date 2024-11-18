@@ -22,6 +22,10 @@ namespace Card
         public Coroutine alarm;
         public bool isInteractable;
 
+        public ChoicePanel choicePanel;
+        public CardChoicePanel cardChoicePanel;
+        public Button cancelButton;
+
         public long uuid;
 
         private void Awake()
@@ -29,7 +33,10 @@ namespace Card
             ClearAlarm();
             uuid = -1;
             SetAlarmText(0, 0);
+            choicePanel.Close();
+            cardChoicePanel.Close();
         }
+
         public void SubmitActionPlayCard(UICard card)
         {
             if (SubmitAction(new ActionPlayCard(card.faceKind)))

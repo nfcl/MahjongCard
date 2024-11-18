@@ -2,14 +2,27 @@ using Data;
 using GameLogic;
 using Mirror;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Data
 {
+    public enum HuaSe
+    {
+        Wan,
+        Bing,
+        Tiao,
+        Feng,
+        SanYuan
+    }
     public struct CardKind : IComparable<CardKind>
     {
         public int value;
 
+        public HuaSe huaSe => (HuaSe)(value > 33 ? 4 : (value / 10));
+        public bool haveHongBao => value == 0 || value == 5 || value == 10 || value == 15 || value == 20 || value == 25;
+        public int realValue => isHongBao ? value + 5 : value;
         public bool isFengPai => 30 <= value && value < 33;
         public bool isSanyuanPai => 33 <= value && value < 37;
         public bool isZiPai => 30 <= value && value < 37;
@@ -120,6 +133,13 @@ namespace Data
             {
                 return order[x.value] - order[y.value];
             }
+        }
+        public static CardKind[] Divider(IEnumerable<CardKind> group)
+        {
+            return group
+                .GroupBy(_ => _.haveHongBao)
+                .Select(_ => _.First())
+                .ToArray();
         }
     }
 }

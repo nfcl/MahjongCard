@@ -29,6 +29,7 @@ namespace MainSceneUI
             if (buttonStyle == 0b000)
             {
                 contentScrollView.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 500);
+                buttons.Foreach((_, index) => _.gameObject.SetActive(false));
             }
             else
             {

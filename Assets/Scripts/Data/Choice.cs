@@ -7,7 +7,11 @@ namespace Data
     public enum ChoiceKind
     {
         None,
-        PlayCard
+        PlayCard,
+        Gang,
+        Peng,
+        Chi,
+        JiuZhongJiuPai
     }
     public class Choice
     {
@@ -38,6 +42,76 @@ namespace Data
             };
         }
     }
+    public class ChoiceGang : Choice
+    {
+        public bool isAnGang;
+        public int fromPeople;
+        public CardKind[][] choices;
+        public CardKind[][] jiaGang;
+
+        public ChoiceGang() : base(ChoiceKind.Gang) { }
+
+        public static ChoiceGang ChoicePlayCardGang(int fromPeople, CardKind[][] choices)
+        {
+            return new ChoiceGang
+            {
+                isAnGang = false,
+                fromPeople = fromPeople,
+                choices = choices,
+                jiaGang = null
+            };
+        }
+        public static ChoiceGang ChoiceDrawCardGang(CardKind[][] choices, CardKind[][] jiaGang)
+        {
+            return new ChoiceGang
+            {
+                isAnGang = true,
+                fromPeople = -1,
+                choices = choices,
+                jiaGang = jiaGang
+            };
+        }
+    }
+    public class ChoicePeng : Choice
+    {
+        public int fromPeople;
+        public CardKind fromPeopleCard;
+        public CardKind[][] choices;
+
+        public ChoicePeng() : base(ChoiceKind.Peng) { }
+
+        public static ChoicePeng NormalPeng(int fromPeople, CardKind fromPeopleCard, CardKind[][] choices)
+        {
+            return new ChoicePeng
+            {
+                fromPeople = fromPeople,
+                fromPeopleCard = fromPeopleCard,
+                choices = choices
+            };
+        }
+    }
+    public class ChoiceChi : Choice
+    {
+        public int fromPeople;
+        public CardKind fromPeopleCard;
+        public CardKind[][] choices;
+
+        public ChoiceChi(): base(ChoiceKind.Chi) { }
+
+        public static ChoiceChi NormalChi(int fromPeople, CardKind fromPeopleCard, CardKind[][] choices)
+        {
+            return new ChoiceChi
+            {
+                fromPeople = fromPeople,
+                fromPeopleCard = fromPeopleCard,
+                choices = choices
+            };
+        }
+    }
+    public class ChoiceJiuZhongJiuPai : Choice
+    {
+        public ChoiceJiuZhongJiuPai() : base(ChoiceKind.JiuZhongJiuPai) { }
+    }
 }
 
 public static class ChoiceSerializer
@@ -56,10 +130,59 @@ public static class ChoiceSerializer
         switch (choice.kind)
         {
             case ChoiceKind.PlayCard:
-                ChoicePlayCard total = choice as ChoicePlayCard;
-                writer.WriteBool(total.isWhite);
-                writer.WriteArray(total.cards);
-                break;
+                {
+                    ChoicePlayCard total = choice as ChoicePlayCard;
+                    writer.WriteBool(total.isWhite);
+                    writer.WriteArray(total.cards);
+                    break;
+                }
+            case ChoiceKind.Peng:
+                {
+                    ChoicePeng total = choice as ChoicePeng;
+                    writer.WriteInt(total.fromPeople);
+                    writer.Write(total.fromPeopleCard);
+                    writer.WriteInt(total.choices.Length);
+                    total.choices.Foreach((_, index) =>
+                    {
+                        writer.WriteArray(_);
+                    });
+                    break;
+                }
+            case ChoiceKind.Chi:
+                {
+                    ChoiceChi total = choice as ChoiceChi;
+                    writer.WriteInt(total.fromPeople);
+                    writer.Write(total.fromPeopleCard);
+                    writer.WriteInt(total.choices.Length);
+                    total.choices.Foreach((_, index) =>
+                    {
+                        writer.WriteArray(_);
+                    });
+                    break;
+                }
+            case ChoiceKind.Gang:
+                {
+                    ChoiceGang total = choice as ChoiceGang;
+                    writer.WriteBool(total.isAnGang);
+                    writer.WriteInt(total.choices.Length);
+                    total.choices.Foreach((_, index) =>
+                    {
+                        writer.WriteArray(_);
+                    });
+                    if (!total.isAnGang)
+                    {
+                        writer.WriteInt(total.fromPeople);
+                    }
+                    else
+                    {
+                        writer.WriteInt(total.jiaGang.Length);
+                        total.jiaGang.Foreach((_, index) =>
+                        {
+                            writer.WriteArray(_);
+                        });
+                    }
+                    break;
+                }
         }
     }
     public static Choice ReadChoice(this NetworkReader reader)
@@ -68,12 +191,67 @@ public static class ChoiceSerializer
         switch (kind)
         {
             case ChoiceKind.PlayCard:
-                ChoicePlayCard choicePlayCard = new ChoicePlayCard
                 {
-                    isWhite = reader.ReadBool(),
-                    cards = reader.ReadArray<CardKind>(),
-                };
-                return choicePlayCard;
+                    return new ChoicePlayCard
+                    {
+                        isWhite = reader.ReadBool(),
+                        cards = reader.ReadArray<CardKind>(),
+                    };
+                }
+            case ChoiceKind.JiuZhongJiuPai:
+                {
+                    return new ChoiceJiuZhongJiuPai();
+                }
+            case ChoiceKind.Peng:
+                {
+                    ChoicePeng choice = new ChoicePeng
+                    {
+                        fromPeople = reader.ReadInt(),
+                        fromPeopleCard = reader.Read<CardKind>(),
+                        choices = new CardKind[reader.ReadInt()][]
+                    };
+                    for(int i = 0; i < choice.choices.Length; ++i)
+                    {
+                        choice.choices = reader.ReadArray <CardKind[]>();
+                    }
+                    return choice;
+                }
+            case ChoiceKind.Chi:
+                {
+                    ChoiceChi choice = new ChoiceChi
+                    {
+                        fromPeople = reader.ReadInt(),
+                        fromPeopleCard = reader.Read<CardKind>(),
+                        choices = new CardKind[reader.ReadInt()][]
+                    };
+                    for (int i = 0; i < choice.choices.Length; ++i)
+                    {
+                        choice.choices = reader.ReadArray<CardKind[]>();
+                    }
+                    return choice;
+                }
+            case ChoiceKind.Gang:
+                {
+                    bool isAnGang = reader.ReadBool();
+                    CardKind[][] choices = new CardKind[reader.ReadInt()][];
+                    for(int i = 0; i < choices.Length; ++i)
+                    {
+                        choices[i] = reader.ReadArray<CardKind>();
+                    }
+                    if (!isAnGang)
+                    {
+                        return ChoiceGang.ChoicePlayCardGang(reader.ReadInt(), choices);
+                    }
+                    else
+                    {
+                        CardKind[][] jiaGang = new CardKind[reader.ReadInt()][];
+                        for (int i = 0; i < choices.Length; ++i)
+                        {
+                            choices[i] = reader.ReadArray<CardKind>();
+                        }
+                        return ChoiceGang.ChoiceDrawCardGang(choices, jiaGang);
+                    }
+                }
         }
         return new Choice();
     }

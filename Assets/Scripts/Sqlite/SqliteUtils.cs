@@ -1,8 +1,6 @@
 using SQLite4Unity3d;
 using SQLiteTable;
-using System.Diagnostics;
 using System.IO;
-using UnityEngine;
 
 public static class SqliteUtils
 {

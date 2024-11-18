@@ -1,6 +1,8 @@
 ﻿using Data;
 using Mirror;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GameLogic
@@ -19,6 +21,52 @@ namespace GameLogic
         public void NextPlayer()
         {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
+        }
+        public Choice[] GetChoiceAfterDrawCard()
+        {
+            List<Choice> choices = new List<Choice>();
+            //打牌
+            choices.Add(ChoicePlayCard.NormalPlayCard());
+            //立直TODO
+            //暗杠或加杠
+            if (paiShan.CanGang && currentPlayer.CheckDrawCardGang(out ChoiceGang choice))
+            {
+                choices.Add(choice);
+            }
+            //自摸TODO
+            //流局（九种九牌）
+            if (currentPlayer.drewCard == 14 && players.Count(_ => _.ming.Count() != 0) == 0)
+            {
+                choices.Add(new ChoiceJiuZhongJiuPai());
+            }
+            return choices.ToArray();
+        }
+        public Choice[] GetChoiceAfterPlayCard(LogicPlayer player, CardKind playedCard)
+        {
+            List<Choice> choices = new List<Choice>();
+            //碰
+            {
+                if(player.CheckPeng(out ChoicePeng choice, player.playerIndex, playedCard))
+                {
+                    choices.Add(choice);
+                }
+            }
+            //吃
+            {
+                if (player.CheckChi(out ChoiceChi choice, player.playerIndex, playedCard))
+                {
+                    choices.Add(choice);
+                }
+            }
+            //明杠
+            {
+                if (paiShan.CanGang && player.CheckPlayCardGang(out ChoiceGang choice, player.playerIndex, playedCard))
+                {
+                    choices.Add(choice);
+                }
+            }
+            //荣和TODO
+            return choices.ToArray();
         }
 
         /// <summary>
