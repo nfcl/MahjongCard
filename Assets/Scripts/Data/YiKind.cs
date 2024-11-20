@@ -1,4 +1,6 @@
-﻿namespace Data
+﻿using System.Collections.Generic;
+
+namespace Data
 {
     public enum YiKind
     {
@@ -54,7 +56,7 @@
         public YiKind kind;
         public int fan;
 
-        public Yi Default(YiKind kind, bool ming = false)
+        public static Yi Default(YiKind kind, bool ming = false)
         {
             return new Yi
             {
@@ -110,6 +112,66 @@
                     _ => -1
                 }
             };
+        }
+        public static void CheckTingPaiChoice(CardKind[] hands, LogicMingPaiGroup mings)
+        {
+
+            #region 可在手牌中检测
+
+            //√断幺九
+            //√中
+            //√发
+            //√白
+            //√一杯口
+            //√对对和
+            //√三暗刻
+            //√三杠子
+            //√三色同刻
+            //√混老头
+            //√小三元
+            //√三色同顺
+            //√一气贯通
+            //√混全带幺九
+            //√七对子
+            //√混一色
+            //√纯全带幺九
+            //√二杯口
+            //√清一色
+            //√大三元
+            //√小四喜
+            //√大四喜
+            //√字一色
+            //√绿一色
+            //√清老头
+            //√国士无双
+            //√国士无双13面
+            //√四暗刻
+            //√四暗刻单骑
+            //√九莲宝灯
+            //√纯正九莲宝灯
+            //√四杠子
+
+            #endregion
+
+            #region 需搭配对局信息
+
+            //役种        需要知道
+            //√自风        自风
+            //√场风        场风
+            //√河底摸鱼     剩余牌数，荣和
+            //√岭上开花     岭上牌，自摸
+            //√抢杠        岭上牌，荣和
+            //√海底捞月     剩余牌数，自摸
+            //√立直        立直
+            //√门前清自摸和 门前清，自摸
+            //√一发        立直后抽牌数，立直后鸣牌数
+            //√平和        自风场风
+            //√两立直      立直时自身抽牌数，立直时鸣牌数
+            //×流局满贯     剩余牌数，是否被碰吃杠，是否打过非幺九
+            //√天和        是否庄家，摸牌数，鸣牌数
+            //√地和        是否子家，摸牌数，鸣牌数
+
+            #endregion
         }
     }
 }

@@ -20,9 +20,12 @@ namespace Data
     {
         public int value;
 
+        public int huaseNum => value % 10 - (value >= 30 ? 0 : 1);
+        public int huaseKind => value / 10;
         public HuaSe huaSe => (HuaSe)(value > 33 ? 4 : (value / 10));
         public bool haveHongBao => value == 0 || value == 5 || value == 10 || value == 15 || value == 20 || value == 25;
         public int realValue => isHongBao ? value + 5 : value;
+        public bool isYaoJiu => value == 1 || value == 9 || value == 11 || value == 19 || value == 21 || value == 29 || value >= 30;
         public bool isFengPai => 30 <= value && value < 33;
         public bool isSanyuanPai => 33 <= value && value < 37;
         public bool isZiPai => 30 <= value && value < 37;

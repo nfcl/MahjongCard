@@ -8,6 +8,8 @@ namespace Data
         public int self2Otherdistance;
         public CardKind otherCard;
         public CardKind[] selfCard;
+        public int signKind;
+        public int signNum;
 
         public CardKind[] GetCards()
         {
@@ -22,5 +24,6 @@ namespace Data
                 return result;
             }
         }
+        public bool ExsistYaoJiu => otherCard.isYaoJiu || selfCard.Any(_ => _.isYaoJiu);
     }
 }

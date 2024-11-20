@@ -9,6 +9,7 @@ namespace Data
     {
         private List<CardKind> cards;
         public CardKind[] Cards => cards.ToArray();
+        public bool hasYaoJiu => cards.Any(_ => _.isYaoJiu);
         public CardKind lastDrewCard;
 
         public LogicHandCard()
