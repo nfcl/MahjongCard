@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using Checker;
+using Data;
 using Mirror;
 using UnityEngine;
 
@@ -8,10 +9,13 @@ namespace Data
     {
         None,
         PlayCard,
+        LiZhi,
         Gang,
         Peng,
         Chi,
-        JiuZhongJiuPai
+        JiuZhongJiuPai,
+        ZiMo,
+        RongHe
     }
     public class Choice
     {
@@ -39,6 +43,20 @@ namespace Data
             {
                 cards = new CardKind[0],
                 isWhite = false,
+            };
+        }
+    }
+    public class ChoiceLiZhi : Choice
+    {
+        public ClientEachCardTingPais choices;
+
+        public ChoiceLiZhi() : base(ChoiceKind.LiZhi) { }
+
+        public static ChoiceLiZhi LiZhi(ClientEachCardTingPais choices)
+        {
+            return new ChoiceLiZhi
+            {
+                choices = choices
             };
         }
     }
@@ -112,6 +130,24 @@ namespace Data
     {
         public ChoiceJiuZhongJiuPai() : base(ChoiceKind.JiuZhongJiuPai) { }
     }
+    public class ChoiceZiMo : Choice
+    {
+        public ChoiceZiMo() : base(ChoiceKind.ZiMo) { }
+
+        public static ChoiceZiMo ZiMo()
+        {
+            return new ChoiceZiMo();
+        }
+    }
+    public class ChoiceRongHe : Choice
+    {
+        public ChoiceRongHe() : base(ChoiceKind.RongHe) { }
+
+        public static ChoiceRongHe RongHe()
+        {
+            return new ChoiceRongHe();
+        }
+    }
 }
 
 public static class ChoiceSerializer
@@ -134,6 +170,12 @@ public static class ChoiceSerializer
                     ChoicePlayCard total = choice as ChoicePlayCard;
                     writer.WriteBool(total.isWhite);
                     writer.WriteArray(total.cards);
+                    break;
+                }
+            case ChoiceKind.LiZhi:
+                {
+                    ChoiceLiZhi total = choice as ChoiceLiZhi;
+                    writer.Write<ClientEachCardTingPais>(total.choices);
                     break;
                 }
             case ChoiceKind.Peng:
@@ -198,6 +240,10 @@ public static class ChoiceSerializer
                         cards = reader.ReadArray<CardKind>(),
                     };
                 }
+            case ChoiceKind.LiZhi:
+                {
+                    return ChoiceLiZhi.LiZhi(reader.Read<ClientEachCardTingPais>());
+                }
             case ChoiceKind.JiuZhongJiuPai:
                 {
                     return new ChoiceJiuZhongJiuPai();
@@ -251,6 +297,14 @@ public static class ChoiceSerializer
                         }
                         return ChoiceGang.ChoiceDrawCardGang(choices, jiaGang);
                     }
+                }
+            case ChoiceKind.ZiMo:
+                {
+                    return ChoiceZiMo.ZiMo();
+                }
+            case ChoiceKind.RongHe:
+                {
+                    return ChoiceRongHe.RongHe();
                 }
         }
         return new Choice();

@@ -8,6 +8,11 @@ namespace Checker
         public int lastCardNum;
         public bool isNoBodyMingPai;
     }
+    public struct MingInfo
+    {
+        public bool isMingPai;
+        public bool isMenQianQing;
+    }
     public struct SelfInfo
     {
         public FengKind ziFeng;
@@ -16,7 +21,6 @@ namespace Checker
         public bool isLiZhi;
         public bool isLiangLiZhi;
         public bool hasYiFa;
-        public bool isMenQianQing;
     }
     public struct HePaiInfo
     {
@@ -27,6 +31,7 @@ namespace Checker
     {
         public RoundInfo roundInfo;
         public SelfInfo selfInfo;
+        public MingInfo mingInfo;
         public HePaiInfo hePaiInfo;
     }
 }

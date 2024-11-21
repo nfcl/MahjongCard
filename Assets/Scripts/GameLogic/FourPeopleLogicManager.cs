@@ -1,9 +1,8 @@
-﻿using Data;
+﻿using Checker;
+using Data;
 using Mirror;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace GameLogic
 {
@@ -13,29 +12,60 @@ namespace GameLogic
         public LogicPlayer[] players;
         public (FengKind feng, int ju, int chang) round;
         public int currentPlayerIndex;
-        public LogicPlayer currentPlayer => players[currentPlayerIndex];
         public int liZhiNum;
-
         public Wait<Action> wait;
+
+        public LogicPlayer currentPlayer => players[currentPlayerIndex];
+        public RoundInfo roundInfo => new RoundInfo
+        {
+            changFeng = (FengKind)round.ju,
+            lastCardNum = paiShan.LastDrawCardCount,
+            isNoBodyMingPai = players.All(_ => !_.ming.isMingPai)
+        };
 
         public void NextPlayer()
         {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
         }
-        public Choice[] GetChoiceAfterDrawCard()
+        public Choice[] GetChoiceAfterDrawCard(bool isLingShang)
         {
-            List<Choice> choices = new List<Choice>();
-            //打牌
-            choices.Add(ChoicePlayCard.NormalPlayCard());
-            //立直TODO
+            List<Choice> choices = new List<Choice>
+            {
+                //打牌
+                ChoicePlayCard.NormalPlayCard()
+            };
+            {
+                var tingPaiChoice = EachHandCardTingPaiResult.Check(
+                    new CheckInfo
+                    {
+                        roundInfo = roundInfo,
+                        selfInfo = currentPlayer.selfInfo,
+                        mingInfo = currentPlayer.ming.mingInfo,
+                        hePaiInfo = new HePaiInfo { isLingShangPai = isLingShang, isRongHe = false }
+                    },
+                    currentPlayer.hand.Cards, currentPlayer.ming.Groups, Yi.Default
+                );
+                ClientEachCardTingPais clientTingPaiChoice = ClientEachCardTingPais.Create(
+                    tingPaiChoice,
+                    1,
+                    _ => CountPlayerLastCardNum(currentPlayerIndex, _),
+                    (_, __) => currentPlayer.zhenTingRecoder[_ * 9 + __]
+                );
+                //立直
+                choices.Add(ChoiceLiZhi.LiZhi(clientTingPaiChoice));
+                //自摸
+                if (tingPaiChoice.isHePai)
+                {
+                    choices.Add(ChoiceZiMo.ZiMo());
+                }
+            }
             //暗杠或加杠
             if (paiShan.CanGang && currentPlayer.CheckDrawCardGang(out ChoiceGang choice))
             {
                 choices.Add(choice);
             }
-            //自摸TODO
             //流局（九种九牌）
-            if (currentPlayer.drewCard == 14 && players.Count(_ => _.ming.Count() != 0) == 0)
+            if (currentPlayer.selfInfo.drewCardNum == 1 && players.Count(_ => _.ming.Count() != 0) == 0)
             {
                 choices.Add(new ChoiceJiuZhongJiuPai());
             }
@@ -65,8 +95,41 @@ namespace GameLogic
                     choices.Add(choice);
                 }
             }
-            //荣和TODO
+            //荣和
+            {
+                if (CheckRongHe(player, playedCard, false))
+                {
+                    choices.Add(ChoiceRongHe.RongHe());
+                }
+            }
             return choices.ToArray();
+        }
+        public int CountPlayerLastCardNum(int playerIndex, CardKind card)
+        {
+            return 4 - players.Sum(_ =>
+            {
+                return _.ming.groups.Sum(_ => _.CountCardNum(card))
+                    + _.paiHe.CountCardNum(card)
+                    + _.playerIndex == playerIndex ? _.hand.CountCardNum(card) : 0;
+            }) - paiShan.GetBaoPai().Count(_ => _.huaseKind == card.huaseKind && _.huaseNum == card.huaseNum);
+        }
+        public bool CheckRongHe(LogicPlayer player, CardKind card, bool isLingShang)
+        {
+            var hand = player.hand.Cards.Append(card).ToArray();
+            var result = EachDrewCardTingPaiResult.Check(
+                new CheckInfo
+                {
+                    roundInfo = roundInfo,
+                    selfInfo = currentPlayer.selfInfo,
+                    mingInfo = currentPlayer.ming.mingInfo,
+                    hePaiInfo = new HePaiInfo { isLingShangPai = isLingShang, isRongHe = true }
+                },
+                hand,
+                player.ming.Groups,
+                card,
+                Yi.Default
+            );
+            return !result.tingPai.IsWuYi && !player.zhenTingRecoder[card.huaseKind * 9 + card.huaseNum];
         }
 
         /// <summary>
@@ -93,10 +156,10 @@ namespace GameLogic
 
             for (int i = 0; i < players.Length; ++i)
             {
-                players[i].RoundStart();
+                players[i].RoundStart((FengKind)((DataManager.playerNum + i - round.ju) % DataManager.playerNum), i == round.ju);
             }
 
-            currentPlayerIndex = (int)round.feng;
+            currentPlayerIndex = round.ju;
         }
         /// <summary>
         /// 配牌事件

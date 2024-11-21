@@ -36,6 +36,10 @@ namespace Data
         {
             value = kind;
         }
+        public CardKind(int kind, int num)
+        {
+            value = kind * 10 + num + kind == 3 ? 0 : 1;
+        }
 
         public static bool operator ==(CardKind self, CardKind other)
         {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor;
 
 namespace Checker
@@ -16,10 +17,20 @@ namespace Checker
             yizhongs = null;
             fanNum = 0;
         }
+        public YiZhongResult(YiZhongResult other)
+        {
+            yizhongs = new List<Yi>(yizhongs);
+            fanNum = other.fanNum;
+        }
         public void Add(Yi yi)
         {
             yizhongs.Add(yi);
             fanNum += yi.fan;
+        }
+        public void Add(YiZhongResult other)
+        {
+            yizhongs.Concat(other.yizhongs);
+            fanNum += other.fanNum;
         }
 
         private static YiZhongResult CheckAdditionalYiZhong(CheckInfo infos, Func<YiKind, Yi> fanDecoder)
@@ -46,30 +57,30 @@ namespace Checker
             {
                 result.Add(fanDecoder(infos.selfInfo.isZhuang ? YiKind.TianHe : YiKind.DiHe));
             }
-            if (!infos.hePaiInfo.isRongHe && infos.selfInfo.isMenQianQing)
+            if (!infos.hePaiInfo.isRongHe && infos.mingInfo.isMenQianQing)
             {
                 result.Add(fanDecoder(YiKind.MenQianQingZiMoHe));
             }
 
             return result;
         }
-        private static YiZhongResult CheckQiDuiYiZhong(CheckInfo infos, TingPaiResult tingPai, Func<YiKind, Yi> fanDecoder)
+        private static YiZhongResult CheckQiDuiYiZhong(CheckInfo infos, CardKind[] hands, Func<YiKind, Yi> fanDecoder)
         {
             YiZhongResult result = new YiZhongResult();
 
             result.Add(fanDecoder(YiKind.QiDuiZi));
-            if (tingPai.hands.All(_ => !(_.huaseKind < 3 && (0 < _.huaseNum && _.huaseNum < 8))))
+            if (hands.All(_ => !(_.huaseKind < 3 && (0 < _.huaseNum && _.huaseNum < 8))))
                 result.Add(fanDecoder(YiKind.HunLaoTou));
-            if (tingPai.hands.All(_ => _.huaseKind == 3))
+            if (hands.All(_ => _.huaseKind == 3))
                 result.Add(fanDecoder(YiKind.ZiYiSe));
 
             return result;
         }
-        private static YiZhongResult CheckGuoShiYiZhong(CheckInfo infos, TingPaiResult tingPai, Func<YiKind, Yi> fanDecoder)
+        private static YiZhongResult CheckGuoShiYiZhong(CheckInfo infos, CardKind[] hands, CardKind lastDrewCard, Func<YiKind, Yi> fanDecoder)
         {
             YiZhongResult result = new YiZhongResult();
 
-            if (infos.selfInfo.drewCardNum == 1 || tingPai.hands.Count(_ => _.realValue == tingPai.lastDrewCard.realValue) == 2)
+            if (infos.selfInfo.drewCardNum == 1 || hands.Count(_ => _.realValue == lastDrewCard.realValue) == 2)
             {
                 result.Add(fanDecoder(YiKind.GuoShiWuShuang13Mian));
             }
@@ -249,7 +260,7 @@ namespace Checker
                     //四暗刻
                     result. Add(fanDecoder(YiKind.SiAnKe));
             }
-            if (infos.selfInfo.isMenQianQing)
+            if (infos.mingInfo.isMenQianQing)
             {
                 if (allShun && !hasYiPai && lastDrewCardBlock.kind == BlockKind.Shun && lastDrewCardBlock.signCardNum + 1 != lastDrewCard.huaseNum)
                     //平和
@@ -303,13 +314,13 @@ namespace Checker
 
             return maxResult;
         }
-        public static void Check(CheckInfo infos, TingPaiResult tingPai, Func<YiKind, bool, Yi> fanDecoder)
+        public static void Check(CheckInfo infos, TingPaiResult tingPai, CardKind[] hands, LogicMingPaiGroup[] mings, CardKind lastDrewCard, Func<YiKind, bool, Yi> fanDecoder)
         {
-            Func<YiKind, Yi> bindFanDecoder = _ => fanDecoder(_, infos.selfInfo.isMenQianQing);
+            Func<YiKind, Yi> bindFanDecoder = _ => fanDecoder(_, infos.mingInfo.isMenQianQing);
             tingPai.additionalYiZhongs = CheckAdditionalYiZhong(infos, bindFanDecoder);
-            tingPai.qiDuiYiResult = CheckQiDuiYiZhong(infos, tingPai, bindFanDecoder);
-            tingPai.guoShiYiResult = CheckGuoShiYiZhong(infos, tingPai, bindFanDecoder);
-            tingPai.normalYiResult = tingPai.normal.Select(_ => CheckNormalYiZhong(infos, tingPai.lastDrewCard, _, tingPai.mings, bindFanDecoder)).ToArray();
+            tingPai.qiDuiYiResult = CheckQiDuiYiZhong(infos, hands, bindFanDecoder);
+            tingPai.guoShiYiResult = CheckGuoShiYiZhong(infos, hands, lastDrewCard, bindFanDecoder);
+            tingPai.normalYiResult = tingPai.normal.Select(_ => CheckNormalYiZhong(infos, lastDrewCard, _, mings, bindFanDecoder)).ToArray();
         }
     }
 }

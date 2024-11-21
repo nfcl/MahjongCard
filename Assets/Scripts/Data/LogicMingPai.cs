@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Checker;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Data
@@ -7,7 +8,15 @@ namespace Data
     {
         public List<LogicMingPaiGroup> groups;
 
-        public bool isMingPai => groups.All(_ => _.kind == MingPaiKind.AnGang);
+        public LogicMingPaiGroup[] Groups => groups.ToArray();
+        public bool isMingPai => groups.Count != 0;
+        public bool isMenQianQing => groups.All(_ => _.kind == MingPaiKind.AnGang);
+
+        public MingInfo mingInfo => new MingInfo
+        {
+            isMenQianQing = isMenQianQing,
+            isMingPai = isMingPai
+        };
 
         public LogicMingPai()
         {

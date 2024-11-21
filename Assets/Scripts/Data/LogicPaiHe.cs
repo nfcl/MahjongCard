@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Data
 {
@@ -17,6 +18,10 @@ namespace Data
         public void BeMingedCard(CardKind card)
         {
             cards.Remove(card);
+        }
+        public int CountCardNum(CardKind card)
+        {
+            return cards.Count(_ => _.huaseKind == card.huaseKind && _.huaseNum == card.huaseNum);
         }
     }
 }

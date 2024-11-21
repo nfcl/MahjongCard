@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -7,7 +6,7 @@ namespace Data
 {
     public class LogicHandCard
     {
-        private List<CardKind> cards;
+        public List<CardKind> cards;
         public CardKind[] Cards => cards.ToArray();
         public bool hasYaoJiu => cards.Any(_ => _.isYaoJiu);
         public CardKind lastDrewCard;
@@ -155,6 +154,10 @@ namespace Data
                 }
             });
             return choices.ToArray();
+        }
+        public int CountCardNum(CardKind card)
+        {
+            return cards.Count(_ => _.huaseKind == card.huaseKind && _.huaseNum == card.huaseNum);
         }
     }
 }

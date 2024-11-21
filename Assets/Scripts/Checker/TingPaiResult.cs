@@ -6,9 +6,6 @@ namespace Checker
 {
     public class TingPaiResult
     {
-        public CardKind lastDrewCard;
-        public CardKind[] hands;
-        public LogicMingPaiGroup[] mings;
         public DivideResult[] normal;
         public YiZhongResult[] normalYiResult;
         public bool isQiDui;
@@ -17,10 +14,32 @@ namespace Checker
         public YiZhongResult guoShiYiResult;
         public YiZhongResult additionalYiZhongs;
 
+        public bool IsWuYi =>
+            normalYiResult.All(_ => _?.fanNum == 0)
+            && (isQiDui && qiDuiYiResult?.fanNum == 0)
+            && (isGuoShi && guoShiYiResult?.fanNum == 0)
+            && additionalYiZhongs?.fanNum == 0;
+
+        public YiZhongResult BestChoice()
+        {
+            YiZhongResult result = normalYiResult.OrderByDescending(_ => _.fanNum).FirstOrDefault();
+
+            if (isQiDui && result.fanNum < qiDuiYiResult.fanNum)
+                result = qiDuiYiResult;
+            if (isGuoShi && result.fanNum < guoShiYiResult.fanNum)
+                result = guoShiYiResult;
+
+            result = new YiZhongResult(result);
+
+            result.Add(additionalYiZhongs);
+
+            return result;
+        }
+
+        public bool canTingPai => normal.Length != 0 || isQiDui || isGuoShi;
+
         public TingPaiResult()
         {
-            hands = null;
-            mings = null;
             normal = null;
             normalYiResult = null;
             isQiDui = false;
@@ -92,8 +111,6 @@ namespace Checker
         public static TingPaiResult CheckTingPaiResult(CardKind[] hands, LogicMingPaiGroup[] mings)
         {
             TingPaiResult result = new TingPaiResult();
-            result.hands = hands;
-            result.mings = mings;
             HandMatrix handsMatrix = new HandMatrix(hands);
             if (mings.All(_ => _.kind == MingPaiKind.BaBei))
             {

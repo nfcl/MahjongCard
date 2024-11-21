@@ -1,11 +1,13 @@
-﻿using Card;
-using System.Collections.Generic;
+﻿using Checker;
 using System.Linq;
 
 namespace Data
 {
     public class LogicPlayer
     {
+
+        public SelfInfo selfInfo;
+
         public int playerIndex;
         public LogicHandCard hand;
         public LogicPaiHe paiHe;
@@ -15,40 +17,50 @@ namespace Data
         public float totalWaitTime => roundWaitTime + globalWaitTime;
         public CardKind LastDrewCard => hand.lastDrewCard;
         public int res;
-        public int drewCard;
+        public bool[] zhenTingRecoder;
 
         public LogicPlayer(int playerIndex, float roundWaitTime, float globalWaitTime, int res)
         {
             hand = null;
             paiHe = null;
             ming = null;
+            zhenTingRecoder = null;
 
             this.playerIndex = playerIndex;
             this.roundWaitTime = roundWaitTime;
             this.globalWaitTime = globalWaitTime;
             this.res = res;
-            this.drewCard = 0;
         }
-        public void RoundStart()
+        public void RoundStart(FengKind ziFeng, bool isZhuang)
         {
+            selfInfo = new SelfInfo
+            {
+                ziFeng = ziFeng,
+                drewCardNum = 0,
+                hasYiFa = false,
+                isLiangLiZhi = false,
+                isLiZhi = false,
+                isZhuang = isZhuang
+            };
             hand = new LogicHandCard();
             paiHe = new LogicPaiHe();
             ming = new LogicMingPai();
+            zhenTingRecoder = new bool[34];
         }
         public void ConfigurCard(CardKind[] cards)
         {
             hand.Init(cards);
-            drewCard = cards.Length;
         }
         public void DrawCard(CardKind card)
         {
+            selfInfo.drewCardNum += 1;
             hand.DrawCard(card);
-            drewCard += 1;
         }
         public void PlayCard(CardKind card)
         {
             hand.PlayCard(card);
             paiHe.PlayCard(card);
+            zhenTingRecoder[card.huaseKind * 9 + card.huaseNum] = true;
         }
         public void Peng(LogicPlayer otherPlayer, LogicMingPaiGroup group)
         {
