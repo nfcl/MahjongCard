@@ -7,7 +7,7 @@ namespace Card
 {
     public class PaiHe : MonoBehaviour
     {
-        public List<RealCard> cards;
+        public List<(int chunk, RealCard card)> cards;
 
         private int chunkIndex;
         private Vector2 chunkLimit;
@@ -55,7 +55,7 @@ namespace Card
             {
                 DestroyImmediate(transform.GetChild(0).gameObject);
             }
-            cards = new List<RealCard>();
+            cards = new List<(int chunk, RealCard card)>();
         }
         public Vector3 GetLastCardRightBorder()
         {
@@ -68,7 +68,7 @@ namespace Card
                     chunkStartPosition.y
                 );
             }
-            RealCard lastCard = cards[cards.Count - 1];
+            RealCard lastCard = cards[cards.Count - 1].card;
             Vector3 result = lastCard.transform.localPosition;
             result.x += lastCard.isLiZhi ? DataManager.paiHeLiZhiCardHorizentalDistance
                                          : DataManager.paiHeCardNormalHorizentalDistance;
@@ -103,7 +103,14 @@ namespace Card
         {
             card.Init(this, isLiZhi, false);
             card.transform.localPosition = GetNextCardPosition(isLiZhi);
-            cards.Add(card);
+            cards.Add((chunkIndex, card));
+        }
+        public RealCard MingCard(CardKind kind)
+        {
+            var card = cards.Last(_ => _.card.faceKind == kind);
+            cards.Remove(card);
+            chunkIndex = cards[cards.Count - 1].chunk;
+            return card.card;
         }
     }
 }

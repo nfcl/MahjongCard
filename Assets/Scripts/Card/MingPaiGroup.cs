@@ -5,7 +5,9 @@ namespace Card
 {
     public class MingPaiGroup : MonoBehaviour
     {
+        public MingPaiKind kind;
         public RealCard[] cards;
+        public int fromPeople;
 
         public float Init(float x, RealCard card, bool isHorizental = false, bool isFanMian = false, bool isJiaGang = false)
         {
@@ -17,7 +19,9 @@ namespace Card
         }
         public float Init(MingPaiKind kind, RealCard[] cards, int fromPeople)
         {
+            this.kind = kind;
             this.cards = cards;
+            this.fromPeople = fromPeople;
             float width = 0;
             switch (kind)
             {
@@ -33,12 +37,17 @@ namespace Card
                         cards.Foreach((_, index) => width = Init(width, _, false, index == 0 || index == 3));
                         break;
                     }
+                case MingPaiKind.BaBei:
+                    {
+                        break;
+                    }
             }
             return width;
         }
-        public void JiaGang(RealCard card, int index)
+        public void JiaGang(RealCard card)
         {
-            Init(index * 0.28f + 0.18f, card, true, false, true);
+            kind = MingPaiKind.JiaGang;
+            Init(fromPeople * 0.28f + 0.18f, card, true, false, true);
         }
     }
 }

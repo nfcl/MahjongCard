@@ -28,6 +28,19 @@ namespace GameLogic
         /// <returns></returns>
         public int GetAbsolutePlayerIndex(int index);
         /// <summary>
+        /// 获得客户端玩家和其他玩家的距离
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public int GetPlayerDistance(int other);
+        /// <summary>
+        /// 获得两个玩家间的距离
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public int GetPlayerDistance(int self, int other);
+        /// <summary>
         /// 判断是不是宝牌
         /// </summary>
         /// <param name="kind"></param>

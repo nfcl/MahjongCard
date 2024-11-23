@@ -2,9 +2,7 @@ using Card;
 using Data;
 using GameLogic;
 using GameSceneUI;
-using System;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class DesktopManager : MonoBehaviour
@@ -21,12 +19,52 @@ public class DesktopManager : MonoBehaviour
 
     #region 实体牌管理
 
-    public RealCard prefab;
+    public RealCard realCardPrefab;
+    public MingPaiGroup mingGroupPrefab;
     public PaiHe[] paiHes;
     public HandCard[] handCards;
+    public MingPai[] mingCards;
 
     #endregion
 
+    public void MingMingPai(MingPaiKind kind,int selfPlayerIndex, int otherPlayerIndex, CardKind otherCard, CardKind[] selfCard)
+    {
+        int relativeSelfIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(selfPlayerIndex);
+        int relativeOtherIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(otherPlayerIndex);
+
+        RealCard paiHeCard = paiHes[relativeOtherIndex].MingCard(otherCard);
+        System.Collections.Generic.List<RealCard> handCard = handCards[relativeSelfIndex].MingCard(selfCard).ToList();
+
+        int distance = IGameLogicManager.instance.GetPlayerDistance(selfPlayerIndex, otherPlayerIndex);
+
+        handCard.Insert(distance - 1, paiHeCard);
+
+        mingCards[relativeSelfIndex].AddGroup(kind, handCard.ToArray(), distance - 1);
+    }
+    public void AnMingPai(MingPaiKind kind, int selfPlayerIndex, CardKind[] selfCard)
+    {
+        int relativeSelfIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(selfPlayerIndex);
+
+        RealCard[] handCard = handCards[relativeSelfIndex].MingCard(selfCard);
+
+        mingCards[relativeSelfIndex].AddGroup(kind, handCard.ToArray());
+    }
+    public void BaBei(int selfPlayerIndex)
+    {
+        int relativeSelfIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(selfPlayerIndex);
+
+        RealCard[] handCard = handCards[relativeSelfIndex].MingCard(new CardKind[] { new CardKind(3, 3) });
+
+        mingCards[selfPlayerIndex].AddGroup(MingPaiKind.BaBei, handCard);
+    }
+    public void JiaGang(int selfPlayerIndex, CardKind gang)
+    {
+        int relativeSelfIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(selfPlayerIndex);
+
+        RealCard[] handCard = handCards[relativeSelfIndex].MingCard(new CardKind[] { gang });
+
+        mingCards[selfPlayerIndex].JiaGang(handCard[0]);
+    }
     public void OnPlayerPlayCard(int playerIndex, CardKind card, bool isZhi)
     {
         int relativeIndex = IGameLogicManager.instance.GetAbsolutePlayerIndex(playerIndex);

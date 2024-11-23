@@ -6,6 +6,7 @@
         Chi,
         MingGang,
         AnGang,
+        JiaGang,
         BaBei
     }
 }

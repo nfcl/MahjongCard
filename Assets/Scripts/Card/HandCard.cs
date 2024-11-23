@@ -122,5 +122,18 @@ namespace Card
             DOTween.Sequence().AppendInterval(0.5f).AppendCallback(FormatCard);
             return playCard;
         }
+        public RealCard[] MingCard(CardKind[] kind)
+        {
+            var results = kind.Select(_ =>
+            {
+                var result = cards.First(__ => __.faceKind == _);
+                cards.Remove(result);
+                return result;
+            }).ToArray();
+
+            FormatCard();
+
+            return results;
+        }
     }
 }

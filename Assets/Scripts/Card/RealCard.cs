@@ -31,7 +31,7 @@ namespace Card
         }
         public static RealCard Create(Material skinMat)
         {
-            RealCard newCard = GameObject.Instantiate(DesktopManager.instance.prefab, DesktopManager.instance.gameObject.transform);
+            RealCard newCard = GameObject.Instantiate(DesktopManager.instance.realCardPrefab, DesktopManager.instance.gameObject.transform);
             newCard.cardSkinRender.material = skinMat;
             return newCard;
         }

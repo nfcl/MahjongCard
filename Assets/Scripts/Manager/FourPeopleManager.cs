@@ -49,6 +49,14 @@ namespace Manager
         {
             CmdSubmitAction(roomIndex, uuid, action);
         }
+        public int GetPlayerDistance(int other)
+        {
+            return GetPlayerDistance(roomIndex, other);
+        }
+        public int GetPlayerDistance(int self, int other)
+        {
+            return (other + DataManager.playerNum - self) % DataManager.playerNum;
+        }
 
         #region 信息同步
 
