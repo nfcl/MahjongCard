@@ -4,7 +4,6 @@ using DG.Tweening;
 using Mirror;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace GameLogic
 {
@@ -80,33 +79,36 @@ namespace GameLogic
             }
             return choices.ToArray();
         }
-        public Choice[] GetChoiceAfterPlayCard(LogicPlayer player, CardKind playedCard)
+        public Choice[] GetChoiceAfterPlayCard(LogicPlayer other, LogicPlayer self, CardKind playedCard)
         {
             List<Choice> choices = new List<Choice>();
             //碰
             {
-                if(player.CheckPeng(out ChoicePeng choice, player.playerIndex, playedCard))
+                if(self.CheckPeng(out ChoicePeng choice, self.playerIndex, playedCard))
                 {
                     choices.Add(choice);
                 }
             }
             //吃
             {
-                if (player.CheckChi(out ChoiceChi choice, player.playerIndex, playedCard))
+                if (
+                    (other.playerIndex + DataManager.playerNum) % DataManager.playerNum == self.playerIndex
+                    && self.CheckChi(out ChoiceChi choice, self.playerIndex, playedCard)
+                )
                 {
                     choices.Add(choice);
                 }
             }
             //明杠
             {
-                if (paiShan.CanGang && player.CheckPlayCardGang(out ChoiceGang choice, player.playerIndex, playedCard))
+                if (paiShan.CanGang && self.CheckPlayCardGang(out ChoiceGang choice, self.playerIndex, playedCard))
                 {
                     choices.Add(choice);
                 }
             }
             //荣和
             {
-                if (CheckRongHe(player, playedCard, false))
+                if (CheckRongHe(self, playedCard, false))
                 {
                     choices.Add(ChoiceRongHe.RongHe());
                 }
@@ -195,14 +197,22 @@ namespace GameLogic
 
             switch (action.kind)
             {
-                case ActionKind.None:
-                    {
-                        break;
-                    }
                 case ActionKind.PlayCard:
                     {
                         ActionPlayCard resultAction = action as ActionPlayCard;
                         OnPlayerPlayCard(player, resultAction.card, false);
+                        break;
+                    }
+                case ActionKind.Gang:
+                    {
+                        break;
+                    }
+                case ActionKind.LiZhi:
+                    {
+                        break;
+                    }
+                case ActionKind.ZiMo:
+                    {
                         break;
                     }
             }
@@ -210,6 +220,7 @@ namespace GameLogic
         private void ProcessPlayCardChoices((LogicPlayer,Action)[] playerChoices)
         {
             wait = null;
+
 
         }
         public virtual void OnPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang) 
@@ -250,7 +261,7 @@ namespace GameLogic
             {
                 if (exceptPlayer.playerIndex != player.playerIndex)
                 {
-                    var temp = GetChoiceAfterPlayCard(exceptPlayer, card);
+                    var temp = GetChoiceAfterPlayCard(player, exceptPlayer, card);
 
                     if (temp.Length != 0)
                     {
