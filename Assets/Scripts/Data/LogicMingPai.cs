@@ -30,11 +30,11 @@ namespace Data
         {
             return groups.Count;
         }
-        public CardKind[][] CheckJiaGang(CardKind[] cards)
+        public ChoiceGang.GangData[] CheckJiaGang(CardKind[] cards)
         {
             return groups
                 .Where(_ => _.kind == MingPaiKind.Peng && cards.Count(__ => __.realValue == _.otherCard.realValue) != 0)
-                .Select(_ => _.GetCards())
+                .Select(_ => new ChoiceGang.GangData { kind = ChoiceGang.GangKind.JiaGang, cards = _.GetCards() })
                 .ToArray();
         }
     }

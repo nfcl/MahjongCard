@@ -101,7 +101,7 @@ namespace GameLogic
             }
             //明杠
             {
-                if (paiShan.CanGang && self.CheckPlayCardGang(out ChoiceGang choice, self.playerIndex, playedCard))
+                if (paiShan.CanGang && self.CheckPlayCardGang(out ChoiceGang choice, playedCard))
                 {
                     choices.Add(choice);
                 }

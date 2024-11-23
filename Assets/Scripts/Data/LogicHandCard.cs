@@ -121,7 +121,7 @@ namespace Data
             }
             return results.ToArray();
         }
-        public CardKind[][] CheckMingGang(CardKind other)
+        public ChoiceGang.GangData[] CheckMingGang(CardKind other)
         {
             List<CardKind[]> results = new List<CardKind[]>();
             var dividedKinds = cards
@@ -133,9 +133,13 @@ namespace Data
             {
                 MingPaiSelect(3, 0, dividedKinds, new List<CardKind>(), results);
             }
-            return results.ToArray();
+            return results.Select(_ => new ChoiceGang.GangData
+            {
+                kind = ChoiceGang.GangKind.AnGang,
+                cards = _
+            }).ToArray();
         }
-        public CardKind[][] CheckAnGang()
+        public ChoiceGang.GangData[] CheckAnGang()
         {
             List<CardKind[]> results = new List<CardKind[]>();
             var over4kinds = cards.GroupBy(_ => _.realValue).Where(_ => _.Count() >= 4);
@@ -150,7 +154,11 @@ namespace Data
                     MingPaiSelect(4, 0, dividedKinds, new List<CardKind>(), results);
                 }
             });
-            return results.ToArray();
+            return results.Select(_ => new ChoiceGang.GangData
+            {
+                kind = ChoiceGang.GangKind.AnGang,
+                cards = _
+            }).ToArray();
         }
         public int CountCardNum(CardKind card)
         {

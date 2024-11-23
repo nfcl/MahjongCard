@@ -54,11 +54,11 @@ namespace Data
     }
     public class ActionGang : Action
     {
-        public CardKind[] gang;
+        public ChoiceGang.GangData data;
 
-        public ActionGang(CardKind[] gang) : base(ActionKind.Gang)
+        public ActionGang(ChoiceGang.GangData data) : base(ActionKind.Gang)
         {
-            this.gang = gang;
+            this.data = data;
         }
     }
     public class ActionChi : Action
@@ -123,7 +123,7 @@ public static class ActionSerializer
             case ActionKind.Gang:
                 {
                     ActionGang total = (action as ActionGang);
-                    writer.WriteArray<CardKind>(total.gang);
+                    writer.Write(total.data);
                     break;
                 }
             case ActionKind.Chi:
@@ -155,7 +155,7 @@ public static class ActionSerializer
             case ActionKind.LiZhi:
                 return new ActionLiZhi(reader.Read<CardKind>());
             case ActionKind.Gang:
-                return new ActionGang(reader.ReadArray<CardKind>());
+                return new ActionGang(reader.Read<ChoiceGang.GangData>());
             case ActionKind.Chi:
                 return new ActionChi(reader.ReadArray<CardKind>());
             case ActionKind.Peng:

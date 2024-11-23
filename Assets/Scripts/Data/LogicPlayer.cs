@@ -124,12 +124,12 @@ namespace Data
         }
         public bool CheckDrawCardGang(out ChoiceGang choice)
         {
-            choice = ChoiceGang.ChoiceDrawCardGang(hand.CheckAnGang().ToArray(), ming.CheckJiaGang(hand.Cards));
-            return choice.choices.Length + choice.jiaGang.Length != 0;
+            choice = ChoiceGang.Gang(hand.CheckAnGang().ToArray().Concat(ming.CheckJiaGang(hand.Cards)).ToArray());
+            return choice.choices.Length != 0;
         }
-        public bool CheckPlayCardGang(out ChoiceGang choice,int fromPeople, CardKind other)
+        public bool CheckPlayCardGang(out ChoiceGang choice, CardKind other)
         {
-            choice = ChoiceGang.ChoicePlayCardGang(fromPeople, hand.CheckMingGang(other).ToArray());
+            choice = ChoiceGang.Gang(hand.CheckMingGang(other).ToArray());
             return choice.choices.Length != 0;
         }
         public bool CheckJiuZhongJiuPai()

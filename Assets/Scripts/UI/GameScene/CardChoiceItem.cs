@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using Card;
+using Data;
 using System;
 using UnityEngine;
 using static MainSceneUI.PropPanel;
@@ -16,6 +17,16 @@ namespace GameSceneUI
             callBack?.Invoke();
         }
 
+        private void Init(CardKind[] cards)
+        {
+            this.cards = new CardChoiceUI[cards.Length];
+            for (int i = 0; i < cards.Length; ++i)
+            {
+                this.cards[i] = GameObject.Instantiate(GameSceneUIManager.instance.gamePanel.cardChoicePanel.cardPrefab, this.transform);
+                this.cards[i].Init(cards[i]);
+                this.cards[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(CardChoicePanel.cardWidth / 2 + (CardChoicePanel.cardWidth + CardChoicePanel.cardDistance) * i, 0);
+            }
+        }
         public void Init(ClientCardTingPaiResult tingPai, bool isZhenTing)
         {
             callBack = null;
@@ -24,16 +35,15 @@ namespace GameSceneUI
             cards[0].Init(tingPai, isZhenTing);
             cards[0].GetComponent<RectTransform>().anchoredPosition = new Vector2(CardChoicePanel.cardWidth / 2, 19.5f);
         }
+        public void Init(ChoiceGang.GangData mingPai, Action<ChoiceGang.GangData> callBack)
+        {
+            this.callBack = () => callBack?.Invoke(mingPai);
+            Init(mingPai.cards);
+        }
         public void Init(CardKind[] mingPai, Action<CardKind[]> callBack)
         {
             this.callBack = () => callBack?.Invoke(mingPai);
-            cards = new CardChoiceUI[mingPai.Length];
-            for (int i = 0; i < cards.Length; ++i)
-            {
-                cards[i] = GameObject.Instantiate(GameSceneUIManager.instance.gamePanel.cardChoicePanel.cardPrefab, this.transform);
-                cards[i].Init(mingPai[i]);
-                cards[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(CardChoicePanel.cardWidth / 2 + (CardChoicePanel.cardWidth + CardChoicePanel.cardDistance) * i, 0);
-            }
+            Init(mingPai);
         }
     }
 }

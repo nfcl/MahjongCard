@@ -1,3 +1,4 @@
+using Card;
 using Data;
 using System;
 using UnityEngine;
@@ -36,6 +37,11 @@ namespace GameSceneUI
             Init(tingPai);
             Open();
         }
+        public void Open(ChoiceGang.GangData[] mingPai, Action<ChoiceGang.GangData> callBack)
+        {
+            Init(mingPai, callBack);
+            Open();
+        }
         public void Open(CardKind[][] mingPai, Action<CardKind[]> callBack)
         {
             Init(mingPai, callBack);
@@ -53,6 +59,27 @@ namespace GameSceneUI
                 DestroyImmediate(container.GetChild(0).gameObject);
             }
         }
+        public void Init(int groupNum, Action<int, CardChoiceItem> cardInitCallback)
+        {
+            Clear();
+            cancelButton.gameObject.SetActive(true);
+            items = new CardChoiceItem[groupNum];
+            float x = margin - itemDistance;
+            for (int i = 0; i < items.Length; ++i)
+            {
+                items[i] = GameObject.Instantiate(itemPrefab, container);
+                x += itemDistance;
+                items[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
+                cardInitCallback(i, items[i]);
+                float itemWidth = cardWidth + (cardWidth + cardDistance) * (items[i].cards.Length - 1);
+                items[i].clickChecker.size = new Vector2(itemWidth, 175);
+                items[i].clickChecker.offset = new Vector2(itemWidth / 2, 0);
+                x += itemWidth;
+            }
+            x += margin;
+            this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
+        }
+
         public void Init(ClientCardTingPai tingPai)
         {
             Clear();
@@ -73,49 +100,45 @@ namespace GameSceneUI
             this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
         }
 
-        public void Init(CardKind[][] mingPai, Action<CardKind[]> callBack)
+        public void Init(ChoiceGang.GangData[] mingPai, Action<ChoiceGang.GangData> callBack)
         {
-            cancelButton.gameObject.SetActive(true);
-            items = new CardChoiceItem[mingPai.Length];
-            float x = margin - itemDistance;
-            for (int i = 0; i < items.Length; ++i)
+            Init(mingPai.Length, (_, __) =>
             {
-                items[i] = GameObject.Instantiate(itemPrefab, container);
-                x += itemDistance;
-                items[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
-                items[i].Init(mingPai[i], callBack);
-                float itemWidth = cardWidth + (cardWidth + cardDistance) * (items[i].cards.Length - 1);
-                items[i].clickChecker.size = new Vector2(itemWidth, 175);
-                items[i].clickChecker.offset = new Vector2(itemWidth / 2, 0);
-                x += itemWidth;
-            }
-            x += margin;
-            this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
+                __.Init(mingPai[_], callBack);
+            });
         }
 
-//#if UNITY_EDITOR
+        public void Init(CardKind[][] mingPai, Action<CardKind[]> callBack)
+        {
+            Init(mingPai.Length, (_, __) =>
+            {
+                __.Init(mingPai[_], callBack);
+            });
+        }
 
-//        private void OnValidate()
-//        {
-//            items = container.GetComponentsInChildren<CardChoiceItem>();
-//            float x = margin - itemDistance;
-//            items.Foreach((_, index) =>
-//            {
-//                x += itemDistance;
-//                _.GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
-//                _.cards.Foreach((__, _index) =>
-//                {
-//                    __.GetComponent<RectTransform>().anchoredPosition = new Vector2(cardWidth / 2 + (cardWidth + cardDistance) * _index, 19.5f);
-//                });
-//                float itemWidth = cardWidth + (cardWidth + cardDistance) * (_.cards.Length - 1);
-//                _.clickChecker.size = new Vector2(itemWidth, 175);
-//                _.clickChecker.offset = new Vector2(itemWidth / 2, 0);
-//                x += itemWidth;
-//            });
-//            x += margin;
-//            this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
-//        }
+        //#if UNITY_EDITOR
 
-//#endif
+        //        private void OnValidate()
+        //        {
+        //            items = container.GetComponentsInChildren<CardChoiceItem>();
+        //            float x = margin - itemDistance;
+        //            items.Foreach((_, index) =>
+        //            {
+        //                x += itemDistance;
+        //                _.GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
+        //                _.cards.Foreach((__, _index) =>
+        //                {
+        //                    __.GetComponent<RectTransform>().anchoredPosition = new Vector2(cardWidth / 2 + (cardWidth + cardDistance) * _index, 19.5f);
+        //                });
+        //                float itemWidth = cardWidth + (cardWidth + cardDistance) * (_.cards.Length - 1);
+        //                _.clickChecker.size = new Vector2(itemWidth, 175);
+        //                _.clickChecker.offset = new Vector2(itemWidth / 2, 0);
+        //                x += itemWidth;
+        //            });
+        //            x += margin;
+        //            this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
+        //        }
+
+        //#endif
     }
 }

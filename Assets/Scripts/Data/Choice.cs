@@ -3,6 +3,7 @@ using Data;
 using Mirror;
 using System.Linq;
 using UnityEngine;
+using static Data.ChoiceGang;
 
 namespace Data
 {
@@ -73,31 +74,26 @@ namespace Data
     }
     public class ChoiceGang : Choice
     {
-        public bool isAnGang;
-        public int fromPeople;
-        public CardKind[][] choices;
-        public CardKind[][] jiaGang;
+        public enum GangKind
+        {
+            MingGang,
+            AnGang,
+            JiaGang
+        }
+        public class GangData
+        {
+            public CardKind[] cards;
+            public GangKind kind;
+        }
+        public GangData[] choices;
 
         public ChoiceGang() : base(ChoiceKind.Gang) { }
 
-        public static ChoiceGang ChoicePlayCardGang(int fromPeople, CardKind[][] choices)
+        public static ChoiceGang Gang(GangData[] choices)
         {
             return new ChoiceGang
             {
-                isAnGang = false,
-                fromPeople = fromPeople,
-                choices = choices,
-                jiaGang = null
-            };
-        }
-        public static ChoiceGang ChoiceDrawCardGang(CardKind[][] choices, CardKind[][] jiaGang)
-        {
-            return new ChoiceGang
-            {
-                isAnGang = true,
-                fromPeople = -1,
-                choices = choices,
-                jiaGang = jiaGang
+                choices = choices
             };
         }
     }
@@ -171,6 +167,27 @@ public static class ChoiceSerializer
     {
         return (ChoiceKind)reader.ReadInt();
     }
+    public static void WriteGangKind(this NetworkWriter writer, GangKind kind)
+    {
+        writer.WriteInt((int)kind);
+    }
+    public static GangKind ReadGangKind(this NetworkReader reader)
+    {
+        return (GangKind)reader.ReadInt();
+    }
+    public static void WriteGangData(this NetworkWriter writer, GangData data)
+    {
+        writer.Write<GangKind>(data.kind);
+        writer.WriteArray<CardKind>(data.cards);
+    }
+    public static GangData ReadGangData(this NetworkReader reader)
+    {
+        return new GangData
+        {
+            kind = reader.Read<GangKind>(),
+            cards = reader.ReadArray<CardKind>()
+        };
+    }
     public static void WriteChoice(this NetworkWriter writer, Choice choice)
     {
         writer.Write<ChoiceKind>(choice.kind);
@@ -216,24 +233,7 @@ public static class ChoiceSerializer
             case ChoiceKind.Gang:
                 {
                     ChoiceGang total = choice as ChoiceGang;
-                    writer.WriteBool(total.isAnGang);
-                    writer.WriteInt(total.choices.Length);
-                    total.choices.Foreach((_, index) =>
-                    {
-                        writer.WriteArray(_);
-                    });
-                    if (!total.isAnGang)
-                    {
-                        writer.WriteInt(total.fromPeople);
-                    }
-                    else
-                    {
-                        writer.WriteInt(total.jiaGang.Length);
-                        total.jiaGang.Foreach((_, index) =>
-                        {
-                            writer.WriteArray(_);
-                        });
-                    }
+                    writer.WriteArray(total.choices);
                     break;
                 }
         }
@@ -289,25 +289,7 @@ public static class ChoiceSerializer
                 }
             case ChoiceKind.Gang:
                 {
-                    bool isAnGang = reader.ReadBool();
-                    CardKind[][] choices = new CardKind[reader.ReadInt()][];
-                    for(int i = 0; i < choices.Length; ++i)
-                    {
-                        choices[i] = reader.ReadArray<CardKind>();
-                    }
-                    if (!isAnGang)
-                    {
-                        return ChoiceGang.ChoicePlayCardGang(reader.ReadInt(), choices);
-                    }
-                    else
-                    {
-                        CardKind[][] jiaGang = new CardKind[reader.ReadInt()][];
-                        for (int i = 0; i < choices.Length; ++i)
-                        {
-                            choices[i] = reader.ReadArray<CardKind>();
-                        }
-                        return ChoiceGang.ChoiceDrawCardGang(choices, jiaGang);
-                    }
+                    return ChoiceGang.Gang(reader.ReadArray<GangData>());
                 }
             case ChoiceKind.ZiMo:
                 {
