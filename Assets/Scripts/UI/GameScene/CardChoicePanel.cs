@@ -1,4 +1,5 @@
 using Data;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,24 +20,26 @@ namespace GameSceneUI
         public CardChoiceItem itemPrefab;
         public CardChoiceItem[] items;
         public Sprite[] ChoiceStateSprite;
-        public Button tingPaiButton;
+        public Button cancelButton;
 
         public void Awake()
         {
             Clear();
         }
 
-        public void Open(Data.TingPai[] tingPai)
+        public void Open()
         {
-            Init(tingPai);
-            tingPaiButton.gameObject.SetActive(false);
             canvasGroup.Open();
         }
-        public void Open(Data.MingPai[] mingPai)
+        public void Open(ClientCardTingPai tingPai)
         {
-            Init(mingPai);
-            tingPaiButton.gameObject.SetActive(true);
-            canvasGroup.Open();
+            Init(tingPai);
+            Open();
+        }
+        public void Open(CardKind[][] mingPai, Action<CardKind[]> callBack)
+        {
+            Init(mingPai, callBack);
+            Open();
         }
         public void Close()
         {
@@ -50,28 +53,29 @@ namespace GameSceneUI
                 DestroyImmediate(container.GetChild(0).gameObject);
             }
         }
-        public void Init(Data.TingPai[] tingPai)
+        public void Init(ClientCardTingPai tingPai)
         {
             Clear();
-            items = new CardChoiceItem[tingPai.Length];
+            cancelButton.gameObject.SetActive(false);
+            items = new CardChoiceItem[tingPai.tingPais.Length];
             float x = margin - itemDistance;
             for (int i = 0; i < items.Length; ++i)
             {
                 items[i] = GameObject.Instantiate(itemPrefab, container);
                 x += itemDistance;
                 items[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
-                items[i].Init(tingPai[i]);
+                items[i].Init(tingPai.tingPais[i], tingPai.isZhenTing);
                 float itemWidth = cardWidth;
-                items[i].clickChecker.size = new Vector2(itemWidth, 175);
-                items[i].clickChecker.offset = new Vector2(itemWidth / 2, 0);
+                items[i].clickChecker.enabled = false;
                 x += itemWidth;
             }
             x += margin;
             this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
         }
 
-        public void Init(Data.MingPai[] mingPai)
+        public void Init(CardKind[][] mingPai, Action<CardKind[]> callBack)
         {
+            cancelButton.gameObject.SetActive(true);
             items = new CardChoiceItem[mingPai.Length];
             float x = margin - itemDistance;
             for (int i = 0; i < items.Length; ++i)
@@ -79,7 +83,7 @@ namespace GameSceneUI
                 items[i] = GameObject.Instantiate(itemPrefab, container);
                 x += itemDistance;
                 items[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
-                items[i].Init(mingPai[i]);
+                items[i].Init(mingPai[i], callBack);
                 float itemWidth = cardWidth + (cardWidth + cardDistance) * (items[i].cards.Length - 1);
                 items[i].clickChecker.size = new Vector2(itemWidth, 175);
                 items[i].clickChecker.offset = new Vector2(itemWidth / 2, 0);
@@ -87,13 +91,6 @@ namespace GameSceneUI
             }
             x += margin;
             this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
-        }
-
-        public enum ChoiceCardState
-        {
-            LastNum,
-            FanFu,
-            WuYi
         }
 
 //#if UNITY_EDITOR

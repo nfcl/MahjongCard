@@ -40,7 +40,7 @@ namespace Data
         }
         public (bool, string) PlayerComplete(LogicPlayer player, T data)
         {
-            WaitPlayer<T> wait = waits.Where(_ => _.player == player).FirstOrDefault();
+            WaitPlayer<T> wait = waits.Where(_ => _.player.playerIndex == player.playerIndex).FirstOrDefault();
             if (wait == null)
             {
                 return (false, "不在等待列表的玩家提交数据");

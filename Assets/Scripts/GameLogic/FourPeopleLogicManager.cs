@@ -1,5 +1,6 @@
 ﻿using Checker;
 using Data;
+using DG.Tweening;
 using Mirror;
 using System.Collections.Generic;
 using System.Linq;
@@ -177,24 +178,12 @@ namespace GameLogic
         /// <param name="player"></param>
         public virtual void OnPlayerRoundStart()
         {
-            OnPlayerDrawCard(currentPlayer, paiShan.GetDrawCard());
-
-            WaitPlayer<Action> waitPlayer = WaitPlayer<Action>.WaitForPlayerSelect(
-                currentPlayer,
-                new ActionPlayCard(currentPlayer.LastDrewCard)
-            );
-            wait = new Wait<Action>(
-                new WaitPlayer<Action>[] { waitPlayer },
-                _ =>
-                {
-                    wait = null;
-                    ProcessPlayerSelect(_[0].Item1, _[0].Item2);
-                }
-            );
-            wait.AlarmStartAll(this);
+            OnPlayerDrawCard(currentPlayer, paiShan.GetDrawCard(), false);
         }
-        private void ProcessPlayerSelect(LogicPlayer player, Action action)
+        private void ProcessDrawCardChoices(LogicPlayer player, Action action)
         {
+            wait = null;
+
             switch (action.kind)
             {
                 case ActionKind.None:
@@ -208,10 +197,31 @@ namespace GameLogic
                         break;
                     }
             }
+        }//和 > 碰 = 杠 > 吃
+        private void ProcessPlayCardChoices((LogicPlayer,Action)[] playerChoices)
+        {
+            wait = null;
+
         }
-        public virtual void OnPlayerDrawCard(LogicPlayer player, CardKind card) 
+        public virtual void OnPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang) 
         {
             player.DrawCard(card);
+
+            WaitPlayer<Action> waitPlayer = WaitPlayer<Action>.WaitForPlayerSelect(
+                currentPlayer,
+                new ActionPlayCard(currentPlayer.LastDrewCard)
+            );
+            wait = new Wait<Action>(
+                new WaitPlayer<Action>[] { waitPlayer },
+                _ =>
+                {
+                    ProcessDrawCardChoices(_[0].Item1, _[0].Item2);
+                }
+            );
+
+            OnSendPlayerChoice(player, wait.uuid, GetChoiceAfterDrawCard(isLingShang), true);
+
+            wait.AlarmStartAll(this);
         }
         /// <summary>
         /// 玩家打出牌
@@ -219,11 +229,51 @@ namespace GameLogic
         public virtual void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
             player.PlayCard(card);
+
+            List<(LogicPlayer, Choice[])> choices = new List<(LogicPlayer, Choice[])>();
+
+            foreach(var exceptPlayer in players)
+            {
+                if (exceptPlayer.playerIndex != player.playerIndex)
+                {
+                    var temp = GetChoiceAfterPlayCard(exceptPlayer, card);
+
+                    if (temp.Length != 0)
+                    {
+                        choices.Add((exceptPlayer, temp));
+                    }
+                }
+            }
+
+            if (choices.Count != 0)
+            {
+                wait = new Wait<Action>(
+                    choices
+                        .Select(_ => WaitPlayer<Action>.WaitForPlayerSelect(_.Item1, new ActionSkip()))
+                        .ToArray(),
+                    ProcessPlayCardChoices
+                );
+
+                choices.ForEach((_) => OnSendPlayerChoice(_.Item1, wait.uuid, _.Item2, false));
+
+                wait.AlarmStartAll(this);
+            }
+            else
+            {
+                OnPlayerRoundEnd(player);
+            }
+
         }
+        public virtual void OnSendPlayerChoice(LogicPlayer player, long uuid, Choice[] choices, bool isDrawCard) { }
 
         public virtual void OnPlayerRoundEnd(LogicPlayer player)
         {
             NextPlayer();
+
+            DOTween.Sequence().AppendInterval(2).AppendCallback(() =>
+            {
+                OnPlayerRoundStart();
+            });
         }
     }
 }

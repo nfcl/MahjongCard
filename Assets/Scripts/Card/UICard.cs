@@ -28,13 +28,20 @@ namespace Card
             set
             {
                 isInteractable = value;
-                cardFace.color = value ? stateColor.yes : stateColor.no;
-                cardBack.color = cardFace.color;
                 if (!isInteractable && isDrag)
                 {
                     isDrag = false;
                     transform.localPosition = GameSceneUIManager.instance.gamePanel.handCard.GetExceptNormalCardPosition(handIndex);
                 }
+            }
+        }
+        public bool IsInteractableWithColor
+        {
+            set
+            {
+                IsInteractable = value;
+                cardFace.color = isInteractable ? stateColor.yes : stateColor.no;
+                cardBack.color = cardFace.color;
             }
         }
         public bool isDrag = false;

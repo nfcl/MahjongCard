@@ -48,10 +48,29 @@ namespace Card
             lastCard = null;
             FormatCard();
         }
+        public void BanCard()
+        {
+            cards.ForEach(_ => _.IsInteractable = false);
+        }
+        public void BanCard(CardKind card)
+        {
+            cards.ForEach(_ =>
+            {
+                if (_.faceKind.huaseKind == card.huaseKind && _.faceKind.huaseNum == card.huaseNum)
+                {
+                    _.IsInteractableWithColor = false;
+                }
+            });
+        }
         public void BanCard(ChoicePlayCard choice)
         {
-            HashSet<CardKind> set = choice.cards.ToHashSet();
-            cards.ForEach(_ => _.IsInteractable = set.Contains(_.faceKind) == choice.isWhite);
+            HashSet<CardKind> set = choice.cards.ToHashSet(CardKind.LogicEqualityComparer);
+            cards.ForEach(_ => _.IsInteractableWithColor = set.Contains(_.faceKind, CardKind.LogicEqualityComparer) == choice.isWhite);
+        }
+        public void BanCard(ChoiceLiZhi choice)
+        {
+            HashSet<CardKind> set = choice.choices.cards.Select(_ => _.playCard).ToHashSet(CardKind.LogicEqualityComparer);
+            cards.ForEach(_ => _.IsInteractableWithColor = !set.Contains(_.faceKind, CardKind.LogicEqualityComparer));
         }
         public void SyncBaoPai()
         {

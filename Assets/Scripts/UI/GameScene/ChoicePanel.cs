@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -60,21 +61,7 @@ namespace GameSceneUI
         public void Init((ChoiceKind kind, D_Void_Void callback)[] data)
         {
             Clear();
-            AddChoice(ChoiceKind.Skip, Close, 0);
-            data.Foreach((_, index) => AddChoice(_.kind, _.callback, index + 1));
-        }
-
-        public enum ChoiceKind
-        {
-            LiZhi,
-            Peng,
-            Gang,
-            Chi,
-            He, 
-            ZiMo,
-            Skip,
-            JiuZhongJiuPai,
-            None
+            data.Foreach((_, index) => AddChoice(_.kind, _.callback, index));
         }
         [Serializable]
         private class ChoiceSpriteLoad

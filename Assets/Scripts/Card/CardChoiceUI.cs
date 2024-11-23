@@ -13,13 +13,13 @@ namespace GameSceneUI
         public TMP_Text tagText;
         public GameObject zhenTing;
 
-        public void Init(TingPai tingpai)
+        public void Init(ClientCardTingPaiResult tingPai, bool isZhenTing)
         {
-            face.sprite = DataManager.GetUICardFaceSprite(tingpai.card);
+            face.sprite = DataManager.GetUICardFaceSprite(tingPai.tingPai);
             back.sprite = DataManager.handBackSprites[0];
-            tagBackground.sprite = GameSceneUIManager.instance.gamePanel.cardChoicePanel.ChoiceStateSprite[(int)tingpai.GetState()];
-            tagText.text = tingpai.GetState() == CardChoicePanel.ChoiceCardState.LastNum ? tingpai.lastNum.ToString() : "";
-            zhenTing.SetActive(tingpai.isZhenTing);
+            tagBackground.sprite = GameSceneUIManager.instance.gamePanel.cardChoicePanel.ChoiceStateSprite[(int)tingPai.state];
+            tagText.text = tingPai.state == ClientCardTingPaiState.last ? tingPai.lastNum.ToString() : "";
+            zhenTing.SetActive(isZhenTing);
         }
         public void Init(CardKind mingpai)
         {

@@ -9,6 +9,7 @@ using UnityEngine;
 using Message;
 using DG.Tweening;
 using System.Text;
+using UnityEditor;
 
 namespace Manager
 {
@@ -128,10 +129,23 @@ namespace Manager
 
         #region 玩家操作
 
-        [TargetRpc]
-        public void TargetGivePlayerChoices(NetworkConnectionToClient connection, long uuid, float roundTime, float globalTime, Choice[] choices)
+        public override void OnSendPlayerChoice(LogicPlayer player, long uuid, Choice[] choices, bool isDrawCard)
         {
-            GameSceneUIManager.instance.gamePanel.InitChoices(uuid, choices);
+            base.OnSendPlayerChoice(player, uuid, choices, isDrawCard);
+
+            TargetSendPlayerChoice(
+                DataManager.GetRoomPlayerConnection(player.playerIndex),
+                uuid,
+                player.roundWaitTime,
+                player.globalWaitTime,
+                choices,
+                isDrawCard
+            );
+        }
+        [TargetRpc]
+        public void TargetSendPlayerChoice(NetworkConnectionToClient connection, long uuid, float roundTime, float globalTime, Choice[] choices, bool isDrawCard)
+        {
+            GameSceneUIManager.instance.gamePanel.InitChoices(uuid, choices, isDrawCard);
             Debug.Log($"倒计时{roundTime}+{globalTime}秒启动");
             GameSceneUIManager.instance.gamePanel.SetAlarm(roundTime, globalTime);
         }
@@ -275,17 +289,6 @@ namespace Manager
             RpcSyncLastCardNum(paiShan.LastDrawCardCount);
 
             RpcOnPlayerRound(currentPlayerIndex);
-
-            TargetGivePlayerChoices(
-                DataManager.GetRoomPlayerConnection(currentPlayerIndex),
-                wait.uuid,
-                currentPlayer.roundWaitTime, 
-                currentPlayer.globalWaitTime,
-                new Choice[]
-                {
-                    ChoicePlayCard.NormalPlayCard()
-                }
-            );
         }
         [ClientRpc]
         public void RpcOnPlayerRound(int playerIndex)
@@ -314,9 +317,6 @@ namespace Manager
         {
             base.OnPlayerPlayCard(player, card, isLiZhi);
             RpcPlayerPlayCard(player.playerIndex, card, isLiZhi);
-
-            OnPlayerRoundEnd(player);
-
         }
         [ClientRpc]
         public void RpcPlayerPlayCard(int playerIndex, CardKind card, bool isLiZhi)
@@ -339,10 +339,6 @@ namespace Manager
         public override void OnPlayerRoundEnd(LogicPlayer player)
         {
             base.OnPlayerRoundEnd(player);
-            DOTween.Sequence().AppendInterval(2).AppendCallback(() =>
-            {
-                OnPlayerRoundStart();
-            });
         }
 
         #endregion

@@ -127,6 +127,19 @@ namespace Data
         {
             return value.CompareTo(other.value);
         }
+        public static LogicEqual LogicEqualityComparer = new LogicEqual();
+        public class LogicEqual :IEqualityComparer<CardKind>
+        {
+            public bool Equals(CardKind x, CardKind y)
+            {
+                return x.huaseKind == y.huaseKind && x.huaseNum == y.huaseNum;
+            }
+
+            public int GetHashCode(CardKind obj)
+            {
+                return obj.huaseKind * 9 + obj.huaseNum;
+            }
+        }
         public class LogicComparer
         {
             public static int[] order =

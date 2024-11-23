@@ -3,6 +3,9 @@ using DG.Tweening;
 using GameLogic;
 using GameSceneUI;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,9 +27,13 @@ namespace Card
 
         public ChoicePanel choicePanel;
         public CardChoicePanel cardChoicePanel;
-        public Button cancelButton;
+        public Button liZhiCancelButton;
+        public Button tingPaiShowButton;
 
         public long uuid;
+        public ChoiceKind currentMode = ChoiceKind.None;
+        public ChoicePlayCard playCardChoice;
+        public ClientEachCardTingPais tingPaiChoices;
 
         private void Awake()
         {
@@ -37,11 +44,59 @@ namespace Card
             cardChoicePanel.Close();
         }
 
+        public void CloseTingPai()
+        {
+            cardChoicePanel.Close();
+        }
+        public bool ShowTingPai(CardKind card)
+        {
+            if (tingPaiChoices.cards.Count(_ => CardKind.LogicEqualityComparer.Equals(card, _.playCard)) != 0)
+            {
+
+                cardChoicePanel.Open(tingPaiChoices.cards.First(_ => CardKind.LogicEqualityComparer.Equals(card, _.playCard)));
+
+                return true;
+            }
+            return false;
+        }
+        public void CancelLiZhi()
+        {
+            if(currentMode == ChoiceKind.LiZhi)
+            {
+                if (playCardChoice == null)
+                {
+                    currentMode = ChoiceKind.None;
+                    handCard.BanCard();
+                }
+                else
+                {
+                    currentMode = ChoiceKind.PlayCard;
+                    handCard.BanCard(playCardChoice);
+                }
+            }
+            liZhiCancelButton.gameObject.SetActive(false);
+        }
         public void SubmitActionPlayCard(UICard card)
         {
-            if (SubmitAction(new ActionPlayCard(card.faceKind)))
+            if (currentMode == ChoiceKind.None)
             {
-                handCard.lastCard = card;
+                return;
+            }
+            else if (currentMode == ChoiceKind.PlayCard)
+            {
+                currentMode = ChoiceKind.None;
+                if (SubmitAction(new ActionPlayCard(card.faceKind)))
+                {
+                    handCard.lastCard = card;
+                }
+            }
+            else if (currentMode == ChoiceKind.LiZhi)
+            {
+                currentMode = ChoiceKind.None;
+                if (SubmitAction(new ActionLiZhi(card.faceKind)))
+                {
+                    handCard.lastCard = card;
+                }
             }
         }
         public bool SubmitAction(Action action)
@@ -60,20 +115,179 @@ namespace Card
 
             return true;
         }
-        public void InitChoices(long uuid,  Choice[] choices)
+        public void InitChoices(long uuid,  Choice[] choices, bool isDrawCard)
         {
+            tingPaiShowButton.gameObject.SetActive(false);
+            cardChoicePanel.Close();
+
             this.uuid = uuid;
-            foreach(var choice in choices)
+
+            List<(ChoiceKind, MainSceneUI.PropPanel.D_Void_Void)> data = new List<(ChoiceKind, MainSceneUI.PropPanel.D_Void_Void)>();
+
+            if (isDrawCard)
+            {
+                data.Add((ChoiceKind.Skip, () => choicePanel.Close()));
+            }
+            else
+            {
+                data.Add((ChoiceKind.Skip, () => { choicePanel.Close(); SubmitAction(new ActionSkip()); }));
+            }
+
+            playCardChoice = choices.FirstOrDefault(_ => _.kind == ChoiceKind.PlayCard) as ChoicePlayCard;
+
+            if (playCardChoice == null)
+            {
+                handCard.BanCard();
+                currentMode = ChoiceKind.None;
+            }
+            else
+            {
+                handCard.BanCard(playCardChoice);
+                currentMode = ChoiceKind.PlayCard;
+            }
+
+            foreach (var choice in choices)
             {
                 switch (choice.kind)
                 {
-                    case ChoiceKind.PlayCard:
+                    case ChoiceKind.LiZhi:
                         {
-                            handCard.BanCard(choice as ChoicePlayCard);
+                            data.Add((
+                                ChoiceKind.LiZhi,
+                                () =>
+                                {
+                                    ChoiceLiZhi totalChoice = choice as ChoiceLiZhi;
+                                    tingPaiChoices = totalChoice.choices;
+                                    handCard.BanCard(totalChoice);
+                                    currentMode = ChoiceKind.LiZhi;
+                                    liZhiCancelButton.gameObject.SetActive(true);
+                                }
+                            ));
+                            break;
+                        }
+                    case ChoiceKind.Gang:
+                        {
+                            data.Add((
+                                ChoiceKind.Gang,
+                                () =>
+                                {
+                                    ChoiceGang totalChoice = choice as ChoiceGang;
+                                    if (totalChoice.choices.Length == 1)
+                                    {
+                                        SubmitAction(new ActionGang(totalChoice.choices[0]));
+                                    }
+                                    else
+                                    {
+                                        cardChoicePanel.Open(
+                                            totalChoice.choices,
+                                            _ =>
+                                            {
+                                                cardChoicePanel.Close();
+                                                currentMode = ChoiceKind.None;
+                                                SubmitAction(new ActionGang(_));
+                                            });
+                                        handCard.BanCard();
+                                        currentMode = ChoiceKind.Gang;
+                                    }
+                                }
+                            ));
+                            break;
+                        }
+                    case ChoiceKind.Peng:
+                        {
+                            data.Add((
+                                ChoiceKind.Peng,
+                                () =>
+                                {
+                                    ChoicePeng totalChoice = choice as ChoicePeng;
+                                    if (totalChoice.choices.Length == 1)
+                                    {
+                                        SubmitAction(new ActionPeng(totalChoice.choices[0]));
+                                    }
+                                    else
+                                    {
+                                        cardChoicePanel.Open(
+                                            totalChoice.choices,
+                                            _ =>
+                                            {
+                                                cardChoicePanel.Close();
+                                                currentMode = ChoiceKind.None;
+                                                SubmitAction(new ActionPeng(_));
+                                            });
+                                        handCard.BanCard();
+                                        currentMode = ChoiceKind.Peng;
+                                    }
+                                }
+                            ));
+                            break;
+                        }
+                    case ChoiceKind.Chi:
+                        {
+                            data.Add((
+                                ChoiceKind.Chi,
+                                () =>
+                                {
+                                    ChoiceChi totalChoice = choice as ChoiceChi;
+                                    if (totalChoice.choices.Length == 1)
+                                    {
+                                        SubmitAction(new ActionChi(totalChoice.choices[0]));
+                                    }
+                                    else
+                                    {
+                                        cardChoicePanel.Open(
+                                            totalChoice.choices,
+                                            _ =>
+                                            {
+                                                cardChoicePanel.Close();
+                                                currentMode = ChoiceKind.None;
+                                                SubmitAction(new ActionChi(_));
+                                            });
+                                        handCard.BanCard();
+                                        currentMode = ChoiceKind.Chi;
+                                    }
+                                }
+                            ));
+                            break;
+                        }
+                    case ChoiceKind.JiuZhongJiuPai:
+                        {
+                            data.Add((
+                                ChoiceKind.JiuZhongJiuPai,
+                                () =>
+                                {
+                                    currentMode = ChoiceKind.None;
+                                    SubmitAction(new ActionJiuZhongJiuPai());
+                                }
+                            ));
+                            break;
+                        }
+                    case ChoiceKind.ZiMo:
+                        {
+                            data.Add((
+                                ChoiceKind.ZiMo,
+                                () =>
+                                {
+                                    currentMode = ChoiceKind.None;
+                                    SubmitAction(new ActionZimo());
+                                }
+                            ));
+                            break;
+                        }
+                    case ChoiceKind.RongHe:
+                        {
+                            data.Add((
+                                ChoiceKind.RongHe,
+                                () =>
+                                {
+                                    SubmitAction(new ActionRongHe());
+                                }
+                            ));
                             break;
                         }
                 }
             }
+
+            choicePanel.Init(data.ToArray());
         }
         public void ClearAlarm()
         {

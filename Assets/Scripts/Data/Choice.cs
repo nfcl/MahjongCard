@@ -8,6 +8,7 @@ namespace Data
     public enum ChoiceKind
     {
         None,
+        Skip,
         PlayCard,
         LiZhi,
         Gang,
