@@ -33,7 +33,7 @@ namespace Checker
                         var newHands = hands.Clone() as CardKind[];
                         newHands[replaceIndex] = new CardKind(i / 9, i % 9);
                         var cardResult = EachDrewCardTingPaiResult.Check(infos, newHands, mings, newHands[replaceIndex], fanDecoder);
-                        if (cardResult.tingPai.canTingPai)
+                        if (cardResult.tingPai.IsTingPai)
                         {
                             eachDrewCardResults.Add(cardResult);
                         }

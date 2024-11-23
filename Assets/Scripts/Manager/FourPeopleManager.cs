@@ -145,6 +145,7 @@ namespace Manager
         [TargetRpc]
         public void TargetSendPlayerChoice(NetworkConnectionToClient connection, long uuid, float roundTime, float globalTime, Choice[] choices, bool isDrawCard)
         {
+            Debug.Log(Choice.ToString(choices));
             GameSceneUIManager.instance.gamePanel.InitChoices(uuid, choices, isDrawCard);
             Debug.Log($"倒计时{roundTime}+{globalTime}秒启动");
             GameSceneUIManager.instance.gamePanel.SetAlarm(roundTime, globalTime);
@@ -278,22 +279,37 @@ namespace Manager
         {
             base.OnPlayerRoundStart();
 
-            RpcPlayerDrawCard(
-                new DrawCardMessage
-                {
-                    card = currentPlayer.LastDrewCard,
-                    playerIndex = currentPlayerIndex
-                }
-            );
-
-            RpcSyncLastCardNum(paiShan.LastDrawCardCount);
-
             RpcOnPlayerRound(currentPlayerIndex);
         }
         [ClientRpc]
         public void RpcOnPlayerRound(int playerIndex)
         {
             DesktopManager.instance.OnPlayerRound(playerIndex);
+        }
+
+        #endregion
+
+        #region 玩家抽牌
+
+        public override void OnPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang)
+        {
+            base.OnPlayerDrawCard(player, card, isLingShang);
+
+            RpcPlayerDrawCard(
+                new DrawCardMessage
+                {
+                    card = card,
+                    playerIndex = player.playerIndex
+                }
+            );
+
+            AfterPlayerDrawCard(player, card, isLingShang);
+        }
+        public override void AfterPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang)
+        {
+            base.AfterPlayerDrawCard(player, card, isLingShang);
+
+            RpcSyncLastCardNum(paiShan.LastDrawCardCount);
         }
         [ClientRpc]
         public void RpcPlayerDrawCard(DrawCardMessage message)
@@ -316,7 +332,10 @@ namespace Manager
         public override void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
             base.OnPlayerPlayCard(player, card, isLiZhi);
+
             RpcPlayerPlayCard(player.playerIndex, card, isLiZhi);
+
+            base.AfterPlayerPlayCard(player, card, isLiZhi);
         }
         [ClientRpc]
         public void RpcPlayerPlayCard(int playerIndex, CardKind card, bool isLiZhi)

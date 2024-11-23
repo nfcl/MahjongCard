@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace Data
 {
@@ -55,7 +55,7 @@ namespace Data
                 new int[9]{ 0,0,0,0,0,0,0,0,0 },
                 new int[7]{ 0,0,0,0,0,0,0     }
             };
-            hands.ToList().ForEach(_ => Add(_));
+            hands.Foreach((_, __) => Add(_));
         }
         public HandMatrix(HandMatrix other)
         {
@@ -71,7 +71,15 @@ namespace Data
         }
         public void Add(CardKind card)
         {
-            matrix[card.huaseKind][card.huaseNum] += 1;
+            try
+            {
+                matrix[card.huaseKind][card.huaseNum] += 1;
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log(card);
+                throw e;
+            }
         }
         public bool TryShun(int huaseKind, int huaseNum, int num = 1)
         {

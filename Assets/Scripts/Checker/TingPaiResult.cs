@@ -14,11 +14,11 @@ namespace Checker
         public YiZhongResult guoShiYiResult;
         public YiZhongResult additionalYiZhongs;
 
+        public bool IsTingPai => normal.Length != 0 || isQiDui || isGuoShi;
         public bool IsWuYi =>
-            normalYiResult.All(_ => _?.fanNum == 0)
-            && (isQiDui && qiDuiYiResult?.fanNum == 0)
-            && (isGuoShi && guoShiYiResult?.fanNum == 0)
-            && additionalYiZhongs?.fanNum == 0;
+            normalYiResult.All(_ => _.fanNum == 0)
+            && (isQiDui && qiDuiYiResult.fanNum == 0)
+            && (isGuoShi && guoShiYiResult.fanNum == 0);
 
         public YiZhongResult BestChoice()
         {
@@ -35,8 +35,6 @@ namespace Checker
 
             return result;
         }
-
-        public bool canTingPai => normal.Length != 0 || isQiDui || isGuoShi;
 
         public TingPaiResult()
         {
@@ -105,7 +103,8 @@ namespace Checker
         public static List<DivideResult> Check3NP2(HandMatrix handsMatrix)
         {
             List<DivideResult> results = new List<DivideResult>();
-            DivideBlock(0, false, handsMatrix, new DivideResult(), results);
+            DivideResult origin = new DivideResult { blocks = new List<Block>(), hasHead = false };
+            DivideBlock(0, false, handsMatrix, origin, results);
             return results;
         }
         public static TingPaiResult CheckTingPaiResult(CardKind[] hands, LogicMingPaiGroup[] mings)

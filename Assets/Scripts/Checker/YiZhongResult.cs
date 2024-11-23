@@ -14,7 +14,7 @@ namespace Checker
 
         public YiZhongResult()
         {
-            yizhongs = null;
+            yizhongs = new List<Yi>();
             fanNum = 0;
         }
         public YiZhongResult(YiZhongResult other)
@@ -39,26 +39,32 @@ namespace Checker
 
             if(infos.roundInfo.lastCardNum == 0)
             {
+                //河底摸鱼/海底捞月
                 result.Add(fanDecoder(infos.hePaiInfo.isRongHe ? YiKind.HeDiMoYu : YiKind.HaiDiLaoYue));
             }
             if (infos.hePaiInfo.isLingShangPai)
             {
+                //抢杠/岭上开花
                 result.Add(fanDecoder(infos.hePaiInfo.isRongHe ? YiKind.QiangGang : YiKind.LingShangKaiHua));
             }
             if (infos.selfInfo.isLiZhi)
             {
+                //立直
                 result.Add(fanDecoder(infos.selfInfo.isLiangLiZhi ? YiKind.LiangLiZhi : YiKind.LiZhi));
                 if (infos.selfInfo.hasYiFa)
                 {
+                    //一发
                     result.Add(fanDecoder(YiKind.YiFa));
                 }
             }
             if (infos.roundInfo.isNoBodyMingPai && infos.selfInfo.drewCardNum == 1)
             {
+                //天和/地和
                 result.Add(fanDecoder(infos.selfInfo.isZhuang ? YiKind.TianHe : YiKind.DiHe));
             }
             if (!infos.hePaiInfo.isRongHe && infos.mingInfo.isMenQianQing)
             {
+                //门前清自摸
                 result.Add(fanDecoder(YiKind.MenQianQingZiMoHe));
             }
 

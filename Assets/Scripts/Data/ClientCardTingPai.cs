@@ -44,7 +44,7 @@ namespace Data
                 {
                     tingPai = choice.Item2[i].lastDrewCard
                 };
-                if (choice.Item2[i].tingPai.IsWuYi)
+                if (choice.Item2[i].tingPai.IsTingPai && choice.Item2[i].tingPai.IsWuYi)
                 {
                     tingPais[i].state = ClientCardTingPaiState.WuYi;
                 }

@@ -90,22 +90,20 @@ namespace Data
             }
             return results.ToArray();
         }
-        private void PengSelect(int index, CardKind[][] src, List<CardKind> road, List<CardKind[]> result)
+        private void MingPaiSelect(int resultNum,int index, (CardKind, int)[] src, List<CardKind> road, List<CardKind[]> result)
         {
             List<CardKind> tempRoad = new List<CardKind>(road);
-            for (int i = 0; i < src[index].Length && i <= (3 - road.Count()); ++i)
+            for (int i = 0; i < src[index].Item2 && i <= resultNum - road.Count; ++i)
             {
-                tempRoad = new List<CardKind>(tempRoad)
-                    {
-                        src[index][i]
-                    };
-                if(tempRoad.Count == 3)
+                tempRoad.Add(src[index].Item1);
+                List<CardKind> _tempRoad = new List<CardKind>(tempRoad);
+                if(_tempRoad.Count == resultNum)
                 {
-                    result.Add(tempRoad.ToArray());
+                    result.Add(_tempRoad.ToArray());
                 }
-                else if(index < src.Length)
+                else if(index + 1 < src.Length)
                 {
-                    PengSelect(index + 1, src, tempRoad, result);
+                    MingPaiSelect(resultNum, index + 1, src, _tempRoad, result);
                 }
             }
         }
@@ -115,45 +113,44 @@ namespace Data
             var dividedKinds = cards
                 .Where(_ => _.realValue == other.realValue)
                 .GroupBy(_ => _.isHongBao)
-                .Select(_ => 
-                    _
-                    .Select(_ => _)
-                    .ToArray()
-                )
+                .Select(_ =>(_.First(),_.Count()))
                 .ToArray();
-            int kindNum = dividedKinds.Count();
-            PengSelect(0, dividedKinds, new List<CardKind>(), results);
+            if (dividedKinds.Length != 0)
+            {
+                MingPaiSelect(2, 0, dividedKinds, new List<CardKind>(), results);
+            }
             return results.ToArray();
         }
-        public CardKind[][] CheckMingGang(CardKind ohter)
+        public CardKind[][] CheckMingGang(CardKind other)
         {
-            List<CardKind[]> choices = new List<CardKind[]>();
-
-            return choices.ToArray();
+            List<CardKind[]> results = new List<CardKind[]>();
+            var dividedKinds = cards
+                .Where(_ => _.realValue == other.realValue)
+                .GroupBy(_ => _.isHongBao)
+                .Select(_ => (_.First(), _.Count()))
+                .ToArray();
+            if (dividedKinds.Length != 0)
+            {
+                MingPaiSelect(3, 0, dividedKinds, new List<CardKind>(), results);
+            }
+            return results.ToArray();
         }
         public CardKind[][] CheckAnGang()
         {
-            List<CardKind[]> choices = new List<CardKind[]>();
+            List<CardKind[]> results = new List<CardKind[]>();
             var over4kinds = cards.GroupBy(_ => _.realValue).Where(_ => _.Count() >= 4);
             over4kinds.Foreach((IGrouping<int, CardKind> _, int index) =>
             {
-                if (_.First().haveHongBao)
+                var dividedKinds = _
+                    .GroupBy(_ => _.isHongBao)
+                    .Select(_ => (_.First(), _.Count()))
+                    .ToArray();
+                if (dividedKinds.Length != 0)
                 {
-                    IEnumerable<CardKind> hong = _.Where(__ => __.isHongBao);
-                    IEnumerable<CardKind> notHong = _.Where(__ => !__.isHongBao);
-                    int hongNum = hong.Count();
-                    int notHongNum = notHong.Count();
-                    for (int i = 0; i <= 4 && i <= hongNum && 4 - i <= notHongNum; ++i)
-                    {
-                        choices.Add(hong.Take(i).Concat(notHong.Take(4 - i)).ToArray());
-                    }
-                }
-                else
-                {
-                    choices.Add(_.Take(4).ToArray());
+                    MingPaiSelect(4, 0, dividedKinds, new List<CardKind>(), results);
                 }
             });
-            return choices.ToArray();
+            return results.ToArray();
         }
         public int CountCardNum(CardKind card)
         {

@@ -1,6 +1,7 @@
 ﻿using Checker;
 using Data;
 using Mirror;
+using System.Linq;
 using UnityEngine;
 
 namespace Data
@@ -29,6 +30,15 @@ namespace Data
         public Choice(ChoiceKind kind)
         {
             this.kind = kind;
+        }
+
+        public override string ToString()
+        {
+            return $"kind = {kind}";
+        }
+        public static string ToString(Choice[] choices)
+        {
+            return choices.Aggregate("Choices : ", (_, __) => $"{_}\n\t{__}");
         }
     }
     public class ChoicePlayCard : Choice
@@ -259,7 +269,7 @@ public static class ChoiceSerializer
                     };
                     for(int i = 0; i < choice.choices.Length; ++i)
                     {
-                        choice.choices = reader.ReadArray <CardKind[]>();
+                        choice.choices[i] = reader.ReadArray<CardKind>();
                     }
                     return choice;
                 }
@@ -273,7 +283,7 @@ public static class ChoiceSerializer
                     };
                     for (int i = 0; i < choice.choices.Length; ++i)
                     {
-                        choice.choices = reader.ReadArray<CardKind[]>();
+                        choice.choices[i] = reader.ReadArray<CardKind>();
                     }
                     return choice;
                 }

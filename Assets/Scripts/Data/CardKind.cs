@@ -20,8 +20,8 @@ namespace Data
     {
         public int value;
 
-        public int huaseNum => value % 10 - (value >= 30 ? 0 : 1);
-        public int huaseKind => value / 10;
+        public int huaseNum => realValue % 10 - (realValue >= 30 ? 0 : 1);
+        public int huaseKind => realValue / 10;
         public HuaSe huaSe => (HuaSe)(value > 33 ? 4 : (value / 10));
         public bool haveHongBao => value == 0 || value == 5 || value == 10 || value == 15 || value == 20 || value == 25;
         public int realValue => isHongBao ? value + 5 : value;
@@ -76,7 +76,7 @@ namespace Data
                 < 20 => $"{value - 10}p",
                 < 30 => $"{value - 20}s",
                 _ => $"{value - 30}z",
-            };
+            } + $"kind = {huaseKind} num = {huaseNum}";
         }
         public static string ToString(CardKind[] kinds)
         {
@@ -166,11 +166,11 @@ namespace Data
 
 public static class CardKindSerializer
 {
-    public static void Writer(NetworkWriter writer, CardKind kind)
+    public static void Writer(this NetworkWriter writer, CardKind kind)
     {
         writer.WriteInt(kind.value);
     }
-    public static CardKind Read(NetworkReader reader)
+    public static CardKind Read(this NetworkReader reader)
     {
         return new CardKind(reader.ReadInt());
     }

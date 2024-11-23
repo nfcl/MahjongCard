@@ -30,6 +30,11 @@ namespace GameSceneUI
         {
             canvasGroup.Open();
         }
+        public void Open((ChoiceKind kind, D_Void_Void callback)[] data)
+        {
+            Init(data);
+            canvasGroup.Open();
+        }
         public void Close()
         {
             canvasGroup.Close();

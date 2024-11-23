@@ -4,6 +4,7 @@ using DG.Tweening;
 using Mirror;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace GameLogic
 {
@@ -52,12 +53,15 @@ namespace GameLogic
                     _ => CountPlayerLastCardNum(currentPlayerIndex, _),
                     (_, __) => currentPlayer.zhenTingRecoder[_ * 9 + __]
                 );
-                //立直
-                choices.Add(ChoiceLiZhi.LiZhi(clientTingPaiChoice));
-                //自摸
-                if (tingPaiChoice.isHePai)
+                if (clientTingPaiChoice.cards.Length != 0)
                 {
-                    choices.Add(ChoiceZiMo.ZiMo());
+                    //立直
+                    choices.Add(ChoiceLiZhi.LiZhi(clientTingPaiChoice));
+                    //自摸
+                    if (tingPaiChoice.isHePai)
+                    {
+                        choices.Add(ChoiceZiMo.ZiMo());
+                    }
                 }
             }
             //暗杠或加杠
@@ -66,7 +70,11 @@ namespace GameLogic
                 choices.Add(choice);
             }
             //流局（九种九牌）
-            if (currentPlayer.selfInfo.drewCardNum == 1 && players.Count(_ => _.ming.Count() != 0) == 0)
+            if (
+                currentPlayer.selfInfo.drewCardNum == 1
+                && players.Count(_ => _.ming.Count() != 0) == 0
+                && currentPlayer.CheckJiuZhongJiuPai()
+            )
             {
                 choices.Add(new ChoiceJiuZhongJiuPai());
             }
@@ -130,7 +138,7 @@ namespace GameLogic
                 card,
                 Yi.Default
             );
-            return !result.tingPai.IsWuYi && !player.zhenTingRecoder[card.huaseKind * 9 + card.huaseNum];
+            return result.tingPai.IsTingPai && !result.tingPai.IsWuYi && !player.zhenTingRecoder[card.huaseKind * 9 + card.huaseNum];
         }
 
         /// <summary>
@@ -143,7 +151,8 @@ namespace GameLogic
             players = new LogicPlayer[4];
             for (int i = 0; i < players.Length; ++i)
             {
-                players[i] = new LogicPlayer(i, 5, 20, 35000);
+                //players[i] = new LogicPlayer(i, 5, 20, 35000);
+                players[i] = new LogicPlayer(i, 1000, 1000, 35000);
             }
 
             liZhiNum = 0;
@@ -153,7 +162,7 @@ namespace GameLogic
         /// </summary>
         public virtual void OnGameRoundStart()
         {
-            paiShan = new LogicPaiShan();
+            paiShan = new LogicPaiShan(0);
 
             for (int i = 0; i < players.Length; ++i)
             {
@@ -206,7 +215,9 @@ namespace GameLogic
         public virtual void OnPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang) 
         {
             player.DrawCard(card);
-
+        }
+        public virtual void AfterPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang)
+        {
             WaitPlayer<Action> waitPlayer = WaitPlayer<Action>.WaitForPlayerSelect(
                 currentPlayer,
                 new ActionPlayCard(currentPlayer.LastDrewCard)
@@ -229,10 +240,13 @@ namespace GameLogic
         public virtual void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
             player.PlayCard(card);
+        }
 
+        public virtual void AfterPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
+        {
             List<(LogicPlayer, Choice[])> choices = new List<(LogicPlayer, Choice[])>();
 
-            foreach(var exceptPlayer in players)
+            foreach (var exceptPlayer in players)
             {
                 if (exceptPlayer.playerIndex != player.playerIndex)
                 {
@@ -262,8 +276,8 @@ namespace GameLogic
             {
                 OnPlayerRoundEnd(player);
             }
-
         }
+
         public virtual void OnSendPlayerChoice(LogicPlayer player, long uuid, Choice[] choices, bool isDrawCard) { }
 
         public virtual void OnPlayerRoundEnd(LogicPlayer player)

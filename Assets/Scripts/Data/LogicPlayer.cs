@@ -132,5 +132,15 @@ namespace Data
             choice = ChoiceGang.ChoicePlayCardGang(fromPeople, hand.CheckMingGang(other).ToArray());
             return choice.choices.Length != 0;
         }
+        public bool CheckJiuZhongJiuPai()
+        {
+            HandMatrix matrix = new HandMatrix(hand.Cards);
+            (int, int)[] yaojius = new (int, int)[]
+            {
+                (0,0),(0,8),(1,0),(1,8),(2,0),(2,8),
+                (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6)
+            };
+            return yaojius.Count(_ => matrix[_.Item1, _.Item2] != 0) >= 9;
+        }
     }
 }

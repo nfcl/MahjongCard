@@ -42,6 +42,8 @@ namespace Card
             SetAlarmText(0, 0);
             choicePanel.Close();
             cardChoicePanel.Close();
+            liZhiCancelButton.gameObject.SetActive(false);
+            tingPaiShowButton.gameObject.SetActive(false);
         }
 
         public void CloseTingPai()
@@ -78,13 +80,8 @@ namespace Card
         }
         public void SubmitActionPlayCard(UICard card)
         {
-            if (currentMode == ChoiceKind.None)
+            if (currentMode == ChoiceKind.PlayCard)
             {
-                return;
-            }
-            else if (currentMode == ChoiceKind.PlayCard)
-            {
-                currentMode = ChoiceKind.None;
                 if (SubmitAction(new ActionPlayCard(card.faceKind)))
                 {
                     handCard.lastCard = card;
@@ -92,7 +89,6 @@ namespace Card
             }
             else if (currentMode == ChoiceKind.LiZhi)
             {
-                currentMode = ChoiceKind.None;
                 if (SubmitAction(new ActionLiZhi(card.faceKind)))
                 {
                     handCard.lastCard = card;
@@ -108,6 +104,11 @@ namespace Card
                 Debug.Log("客户端UUID未通过检测");
                 return false;
             }
+
+            currentMode = ChoiceKind.None;
+            choicePanel.Close();
+            cardChoicePanel.Close();
+            handCard.UnBanCard();
 
             ClearAlarm();
 
@@ -146,12 +147,15 @@ namespace Card
                 currentMode = ChoiceKind.PlayCard;
             }
 
+            bool needShowChoicesPanel = false;
+
             foreach (var choice in choices)
             {
                 switch (choice.kind)
                 {
                     case ChoiceKind.LiZhi:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.LiZhi,
                                 () =>
@@ -167,6 +171,7 @@ namespace Card
                         }
                     case ChoiceKind.Gang:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.Gang,
                                 () =>
@@ -182,7 +187,6 @@ namespace Card
                                             totalChoice.choices,
                                             _ =>
                                             {
-                                                cardChoicePanel.Close();
                                                 currentMode = ChoiceKind.None;
                                                 SubmitAction(new ActionGang(_));
                                             });
@@ -195,6 +199,7 @@ namespace Card
                         }
                     case ChoiceKind.Peng:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.Peng,
                                 () =>
@@ -210,7 +215,6 @@ namespace Card
                                             totalChoice.choices,
                                             _ =>
                                             {
-                                                cardChoicePanel.Close();
                                                 currentMode = ChoiceKind.None;
                                                 SubmitAction(new ActionPeng(_));
                                             });
@@ -223,6 +227,7 @@ namespace Card
                         }
                     case ChoiceKind.Chi:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.Chi,
                                 () =>
@@ -238,7 +243,6 @@ namespace Card
                                             totalChoice.choices,
                                             _ =>
                                             {
-                                                cardChoicePanel.Close();
                                                 currentMode = ChoiceKind.None;
                                                 SubmitAction(new ActionChi(_));
                                             });
@@ -251,6 +255,7 @@ namespace Card
                         }
                     case ChoiceKind.JiuZhongJiuPai:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.JiuZhongJiuPai,
                                 () =>
@@ -263,6 +268,7 @@ namespace Card
                         }
                     case ChoiceKind.ZiMo:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.ZiMo,
                                 () =>
@@ -275,6 +281,7 @@ namespace Card
                         }
                     case ChoiceKind.RongHe:
                         {
+                            needShowChoicesPanel = true;
                             data.Add((
                                 ChoiceKind.RongHe,
                                 () =>
@@ -287,7 +294,10 @@ namespace Card
                 }
             }
 
-            choicePanel.Init(data.ToArray());
+            if (needShowChoicesPanel)
+            {
+                choicePanel.Open(data.ToArray());
+            }
         }
         public void ClearAlarm()
         {

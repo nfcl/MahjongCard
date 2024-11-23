@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿using System;
 
 namespace Data
 {
@@ -14,7 +14,7 @@ namespace Data
         public bool CanLiZhi => LastDrawCardCount >= 4;
         public bool CanGang => LastDrawCardCount > 0;
 
-        public LogicPaiShan()
+        public LogicPaiShan(int seed)
         {
             cards = new CardKind[34 * 4];
             int num = 0;
@@ -41,16 +41,18 @@ namespace Data
             lingShang = 0;
             baoPai = 1;
             drawCard = 0;
-            Randomize();
+            Randomize(seed);
         }
-        private void Randomize()
+        private void Randomize(int seed)
         {
+            Random rand = new Random(seed);
+
             CardKind tmp;
             int swapIndex;
             for (int i = 0; i < cards.Length; ++i)
             {
                 tmp = cards[i];
-                swapIndex = Random.Range(i, cards.Length);
+                swapIndex = rand.Next(i, cards.Length);
                 cards[i] = cards[swapIndex];
                 cards[swapIndex] = tmp;
             }

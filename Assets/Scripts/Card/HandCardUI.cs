@@ -48,19 +48,17 @@ namespace Card
             lastCard = null;
             FormatCard();
         }
+        public void UnBanCard()
+        {
+            cards.ForEach(_ => _.IsInteractable = true);
+        }
         public void BanCard()
         {
             cards.ForEach(_ => _.IsInteractable = false);
         }
         public void BanCard(CardKind card)
         {
-            cards.ForEach(_ =>
-            {
-                if (_.faceKind.huaseKind == card.huaseKind && _.faceKind.huaseNum == card.huaseNum)
-                {
-                    _.IsInteractableWithColor = false;
-                }
-            });
+            cards.ForEach(_ => _.IsInteractableWithColor = !CardKind.LogicEqualityComparer.Equals(_.faceKind, card));
         }
         public void BanCard(ChoicePlayCard choice)
         {
