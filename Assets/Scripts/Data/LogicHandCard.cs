@@ -38,56 +38,30 @@ namespace Data
         }
         public CardKind[][] CheckChi(CardKind other)
         {
-            if (other.huaSe == HuaSe.Feng || other.huaSe == HuaSe.SanYuan)
+            if (other.huaseKind == 3)
             {
                 return new CardKind[0][];
             }
             List<CardKind[]> results = new List<CardKind[]>();
-            var closeKinds = cards
-                .Where(_ => _.huaSe == other.huaSe && Mathf.Abs(_.realValue - other.realValue) <= 2)
-                .GroupBy(_ => _.realValue)
-                .ToList();
-            closeKinds.Sort((x, y) => CardKind.LogicComparer.Compare(x.First(), y.First()));
-            for (int i = 0; i < closeKinds.Count - 2; ++i)
+
+            CardKind[][] cardsOrderedPosition = new CardKind[4][]
             {
-                if (closeKinds[i].First().realValue + 1 == closeKinds[i + 1].First().realValue
-                    && closeKinds[i].First().realValue + 2 == closeKinds[i + 2].First().realValue)
-                {
-                    CardKind[][] dividedKinds =
-                        new CardKind[][]
-                        {
-                            CardKind.Divider(closeKinds[i + 0]),
-                            CardKind.Divider(closeKinds[i + 1]),
-                            CardKind.Divider(closeKinds[i + 2])
-                        };
-                    int _ = 0, __ = 0, ___ = 0;
-                    while (true)
-                    {
-                        results.Add(new CardKind[]
-                        {
-                            dividedKinds[000][_],
-                            dividedKinds[01][__],
-                            dividedKinds[2][___],
-                        });
-                        ___ += 1;
-                        if (___ == dividedKinds[2].Length)
-                        {
-                            ___ = 0;
-                            __ += 1;
-                            if (__ == dividedKinds[1].Length)
-                            {
-                                __ = 0;
-                                _ += 1;
-                                if (_ == dividedKinds[0].Length)
-                                {
-                                    _ = 0;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum - 2))).ToArray(),
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum - 1))).ToArray(),
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum + 1))).ToArray(),
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum + 2))).ToArray()
+            };
+
+            cardsOrderedPosition[0].Foreach((_, index) =>
+                cardsOrderedPosition[1].Foreach((__, _index) =>
+                    results.Add(new CardKind[] { _, __, other })));
+            cardsOrderedPosition[1].Foreach((_, index) =>
+                cardsOrderedPosition[2].Foreach((__, _index) =>
+                    results.Add(new CardKind[] { _, __, other })));
+            cardsOrderedPosition[2].Foreach((_, index) =>
+                cardsOrderedPosition[3].Foreach((__, _index) =>
+                    results.Add(new CardKind[] { _, __, other })));
+
             return results.ToArray();
         }
         private void MingPaiSelect(int resultNum,int index, (CardKind, int)[] src, List<CardKind> road, List<CardKind[]> result)
