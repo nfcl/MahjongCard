@@ -14,7 +14,9 @@ namespace GameLogic
         public (FengKind feng, int ju, int chang) round;
         public int currentPlayerIndex;
         public int liZhiNum;
+
         public Wait<Action> wait;
+        public (LogicPlayer player, Choice[] choices)[] playerChoices;
 
         public LogicPlayer currentPlayer => players[currentPlayerIndex];
         public RoundInfo roundInfo => new RoundInfo
@@ -24,6 +26,12 @@ namespace GameLogic
             isNoBodyMingPai = players.All(_ => !_.ming.isMingPai)
         };
 
+        public T GetPlayerChoice<T>(LogicPlayer player, ChoiceKind kind) where T : Choice
+        {
+            return playerChoices
+                .First(_ => _.player.playerIndex == player.playerIndex)
+                .choices.First(_ => _.kind == kind) as T;
+        }
         public void NextPlayer()
         {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
@@ -199,12 +207,24 @@ namespace GameLogic
             {
                 case ActionKind.PlayCard:
                     {
-                        ActionPlayCard resultAction = action as ActionPlayCard;
-                        OnPlayerPlayCard(player, resultAction.card, false);
+                        ActionPlayCard totalAction = action as ActionPlayCard;
+                        OnPlayerPlayCard(player, totalAction.card, false);
                         break;
                     }
                 case ActionKind.Gang:
                     {
+                        ActionGang totalAction = action as ActionGang;
+                        ChoiceGang data = GetPlayerChoice<ChoiceGang>(player, ChoiceKind.Gang);
+                        OnPlayerMingCard(
+                            player,
+                            data.choices[totalAction.index].kind switch
+                            {
+                                ChoiceGang.GangKind.AnGang => MingPaiKind.AnGang,
+                                ChoiceGang.GangKind.JiaGang => MingPaiKind.JiaGang,
+                                _ => throw new System.Exception("抽牌时不应存在明杠")
+                            },
+                            data.choices[totalAction.index].cards
+                        );
                         break;
                     }
                 case ActionKind.LiZhi:
@@ -216,12 +236,51 @@ namespace GameLogic
                         break;
                     }
             }
-        }//和 > 碰 = 杠 > 吃
+        }//和 > 碰/杠 > 吃
         private void ProcessPlayCardChoices((LogicPlayer,Action)[] playerChoices)
         {
             wait = null;
 
+            var ordered = playerChoices.OrderBy(_ =>
+                _.Item2.kind switch
+                {
+                    ActionKind.RongHe => 1,
+                    ActionKind.Gang => 2,
+                    ActionKind.Peng => 3,
+                    ActionKind.Chi => 4,
+                    ActionKind.Skip => 5,
+                    _ => throw new System.Exception("打牌时不应存在其他Action"),
+                }
+            );
 
+            var firstChoice = ordered.First();
+
+            switch (firstChoice.Item2.kind)
+            {
+                case ActionKind.RongHe:
+                    {
+                        break;
+                    }
+                case ActionKind.Gang:
+                    {
+                        ActionGang totalAction = firstChoice.Item2 as ActionGang;
+                        ChoiceGang data = GetPlayerChoice<ChoiceGang>(firstChoice.Item1, ChoiceKind.Gang);
+                        OnPlayerMingCard(firstChoice.Item1, MingPaiKind.MingGang, data.choices[totalAction.index].cards);
+                        break;
+                    }
+                case ActionKind.Peng:
+                    {
+                        break;
+                    }
+                case ActionKind.Chi:
+                    {
+                        break;
+                    }
+                case ActionKind.Skip:
+                    {
+                        break;
+                    }
+            }
         }
         public virtual void OnPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang) 
         {
@@ -241,7 +300,14 @@ namespace GameLogic
                 }
             );
 
-            OnSendPlayerChoice(player, wait.uuid, GetChoiceAfterDrawCard(isLingShang), true);
+            Choice[] choices = GetChoiceAfterDrawCard(isLingShang);
+
+            playerChoices = new (LogicPlayer player, Choice[] choices)[]
+            {
+                (player, choices)
+            };
+
+            OnSendPlayerChoice(player, wait.uuid, choices, true);
 
             wait.AlarmStartAll(this);
         }
@@ -270,6 +336,8 @@ namespace GameLogic
                 }
             }
 
+            playerChoices = null;
+
             if (choices.Count != 0)
             {
                 wait = new Wait<Action>(
@@ -279,6 +347,8 @@ namespace GameLogic
                     ProcessPlayCardChoices
                 );
 
+                playerChoices = choices.ToArray();
+
                 choices.ForEach((_) => OnSendPlayerChoice(_.Item1, wait.uuid, _.Item2, false));
 
                 wait.AlarmStartAll(this);
@@ -287,6 +357,11 @@ namespace GameLogic
             {
                 OnPlayerRoundEnd(player);
             }
+        }
+
+        public virtual void OnPlayerMingCard(LogicPlayer player, MingPaiKind kind, CardKind[] cards)
+        {
+
         }
 
         public virtual void OnSendPlayerChoice(LogicPlayer player, long uuid, Choice[] choices, bool isDrawCard) { }

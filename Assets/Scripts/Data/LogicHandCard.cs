@@ -119,7 +119,7 @@ namespace Data
             {
                 MingPaiSelect(2, 0, dividedKinds, new List<CardKind>(), results);
             }
-            return results.ToArray();
+            return results.Select(_ => _.Append(other).ToArray()).ToArray();
         }
         public ChoiceGang.GangData[] CheckMingGang(CardKind other)
         {
@@ -136,7 +136,7 @@ namespace Data
             return results.Select(_ => new ChoiceGang.GangData
             {
                 kind = ChoiceGang.GangKind.AnGang,
-                cards = _
+                cards = _.Append(other).ToArray()
             }).ToArray();
         }
         public ChoiceGang.GangData[] CheckAnGang()

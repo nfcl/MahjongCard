@@ -179,13 +179,13 @@ namespace Card
                                     ChoiceGang totalChoice = choice as ChoiceGang;
                                     if (totalChoice.choices.Length == 1)
                                     {
-                                        SubmitAction(new ActionGang(totalChoice.choices[0]));
+                                        SubmitAction(new ActionGang(0));
                                     }
                                     else
                                     {
                                         cardChoicePanel.Open(
-                                            totalChoice.choices,
-                                            _ =>
+                                            totalChoice.choices.Select(_ => _.cards).ToArray(),
+                                            (_) =>
                                             {
                                                 currentMode = ChoiceKind.None;
                                                 SubmitAction(new ActionGang(_));
@@ -207,7 +207,7 @@ namespace Card
                                     ChoicePeng totalChoice = choice as ChoicePeng;
                                     if (totalChoice.choices.Length == 1)
                                     {
-                                        SubmitAction(new ActionPeng(totalChoice.choices[0]));
+                                        SubmitAction(new ActionPeng(0));
                                     }
                                     else
                                     {
@@ -235,7 +235,7 @@ namespace Card
                                     ChoiceChi totalChoice = choice as ChoiceChi;
                                     if (totalChoice.choices.Length == 1)
                                     {
-                                        SubmitAction(new ActionChi(totalChoice.choices[0]));
+                                        SubmitAction(new ActionChi(0));
                                     }
                                     else
                                     {

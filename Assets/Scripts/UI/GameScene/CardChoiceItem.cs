@@ -35,14 +35,9 @@ namespace GameSceneUI
             cards[0].Init(tingPai, isZhenTing);
             cards[0].GetComponent<RectTransform>().anchoredPosition = new Vector2(CardChoicePanel.cardWidth / 2, 19.5f);
         }
-        public void Init(ChoiceGang.GangData mingPai, Action<ChoiceGang.GangData> callBack)
+        public void Init(CardKind[] mingPai, D_Void_Void callBack)
         {
-            this.callBack = () => callBack?.Invoke(mingPai);
-            Init(mingPai.cards);
-        }
-        public void Init(CardKind[] mingPai, Action<CardKind[]> callBack)
-        {
-            this.callBack = () => callBack?.Invoke(mingPai);
+            this.callBack = callBack;
             Init(mingPai);
         }
     }

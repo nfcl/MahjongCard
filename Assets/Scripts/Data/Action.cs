@@ -54,29 +54,29 @@ namespace Data
     }
     public class ActionGang : Action
     {
-        public ChoiceGang.GangData data;
+        public int index;
 
-        public ActionGang(ChoiceGang.GangData data) : base(ActionKind.Gang)
+        public ActionGang(int index) : base(ActionKind.Gang)
         {
-            this.data = data;
+            this.index = index;
         }
     }
     public class ActionChi : Action
     {
-        public CardKind[] chi;
+        public int index;
 
-        public ActionChi(CardKind[] chi) : base(ActionKind.Chi)
+        public ActionChi(int index) : base(ActionKind.Chi)
         {
-            this.chi = chi;
+            this.index = index;
         }
     }
     public class ActionPeng : Action
     {
-        public CardKind[] peng;
+        public int index;
 
-        public ActionPeng(CardKind[] peng) : base(ActionKind.Peng)
+        public ActionPeng(int index) : base(ActionKind.Peng)
         {
-            this.peng = peng;
+            this.index = index;
         }
     }
     public class ActionJiuZhongJiuPai : Action
@@ -123,19 +123,19 @@ public static class ActionSerializer
             case ActionKind.Gang:
                 {
                     ActionGang total = (action as ActionGang);
-                    writer.Write(total.data);
+                    writer.WriteInt(total.index);
                     break;
                 }
             case ActionKind.Chi:
                 {
                     ActionChi total = (action as ActionChi);
-                    writer.WriteArray<CardKind>(total.chi);
+                    writer.WriteInt(total.index);
                     break;
                 }
             case ActionKind.Peng:
                 {
                     ActionPeng total = (action as ActionPeng);
-                    writer.WriteArray<CardKind>(total.peng);
+                    writer.WriteInt(total.index);
                     break;
                 }
 
@@ -155,11 +155,11 @@ public static class ActionSerializer
             case ActionKind.LiZhi:
                 return new ActionLiZhi(reader.Read<CardKind>());
             case ActionKind.Gang:
-                return new ActionGang(reader.Read<ChoiceGang.GangData>());
+                return new ActionGang(reader.ReadInt());
             case ActionKind.Chi:
-                return new ActionChi(reader.ReadArray<CardKind>());
+                return new ActionChi(reader.ReadInt());
             case ActionKind.Peng:
-                return new ActionPeng(reader.ReadArray<CardKind>());
+                return new ActionPeng(reader.ReadInt());
             case ActionKind.JiuZhongJiuPai:
                 return new ActionJiuZhongJiuPai();
             case ActionKind.ZiMo:

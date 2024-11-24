@@ -37,12 +37,7 @@ namespace GameSceneUI
             Init(tingPai);
             Open();
         }
-        public void Open(ChoiceGang.GangData[] mingPai, Action<ChoiceGang.GangData> callBack)
-        {
-            Init(mingPai, callBack);
-            Open();
-        }
-        public void Open(CardKind[][] mingPai, Action<CardKind[]> callBack)
+        public void Open(CardKind[][] mingPai, Action<int> callBack)
         {
             Init(mingPai, callBack);
             Open();
@@ -100,19 +95,11 @@ namespace GameSceneUI
             this.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, x);
         }
 
-        public void Init(ChoiceGang.GangData[] mingPai, Action<ChoiceGang.GangData> callBack)
+        public void Init(CardKind[][] mingPai, Action<int> callBack)
         {
             Init(mingPai.Length, (_, __) =>
             {
-                __.Init(mingPai[_], callBack);
-            });
-        }
-
-        public void Init(CardKind[][] mingPai, Action<CardKind[]> callBack)
-        {
-            Init(mingPai.Length, (_, __) =>
-            {
-                __.Init(mingPai[_], callBack);
+                __.Init(mingPai[_], () => callBack?.Invoke(_));
             });
         }
 

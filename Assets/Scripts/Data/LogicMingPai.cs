@@ -34,7 +34,16 @@ namespace Data
         {
             return groups
                 .Where(_ => _.kind == MingPaiKind.Peng && cards.Count(__ => __.realValue == _.otherCard.realValue) != 0)
-                .Select(_ => new ChoiceGang.GangData { kind = ChoiceGang.GangKind.JiaGang, cards = _.GetCards() })
+                .Select(_ =>
+                    new ChoiceGang.GangData
+                    {
+                        kind = ChoiceGang.GangKind.JiaGang,
+                        cards = _
+                            .GetCards()
+                            .Append(cards.First(__ => CardKind.LogicEqualityComparer.Equals(__, _.signKind, _.signNum)))
+                            .ToArray()
+                    }
+                )
                 .ToArray();
         }
     }

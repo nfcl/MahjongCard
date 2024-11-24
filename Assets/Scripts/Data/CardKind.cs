@@ -134,6 +134,14 @@ namespace Data
             {
                 return x.huaseKind == y.huaseKind && x.huaseNum == y.huaseNum;
             }
+            public bool Equals(CardKind x, int kind, int num)
+            {
+                return x.huaseKind == kind && x.huaseNum == num;
+            }
+            public bool Equals(int kind, int num, CardKind y)
+            {
+                return kind == y.huaseKind && num == y.huaseNum;
+            }
 
             public int GetHashCode(CardKind obj)
             {
