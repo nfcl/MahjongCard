@@ -65,6 +65,11 @@ namespace Card
 
             face.gameObject.SetActive(!isHide);
         }
+        public void Init(MingPaiGroup group, bool isHorizental = false, bool isFanMian = false, bool isJiaGang = false)
+        {
+            transform.localEulerAngles = new Vector3(0, isHorizental ? 90 : 0, isFanMian ? -90 : 90);
+            face.gameObject.SetActive(true);
+        }
 
         //private void OnValidate()
         //{

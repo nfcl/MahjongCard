@@ -67,8 +67,8 @@ namespace GameSceneUI
                 items[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
                 cardInitCallback(i, items[i]);
                 float itemWidth = cardWidth + (cardWidth + cardDistance) * (items[i].cards.Length - 1);
-                items[i].clickChecker.size = new Vector2(itemWidth, 175);
-                items[i].clickChecker.offset = new Vector2(itemWidth / 2, 0);
+                items[i].clickChecker.localPosition = new Vector3(itemWidth / 2, 0, 0);
+                items[i].clickChecker.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, itemWidth);
                 x += itemWidth;
             }
             x += margin;
@@ -88,7 +88,7 @@ namespace GameSceneUI
                 items[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(x, 0);
                 items[i].Init(tingPai.tingPais[i], tingPai.isZhenTing);
                 float itemWidth = cardWidth;
-                items[i].clickChecker.enabled = false;
+                items[i].clickChecker.gameObject.SetActive(false);
                 x += itemWidth;
             }
             x += margin;
@@ -99,7 +99,11 @@ namespace GameSceneUI
         {
             Init(mingPai.Length, (_, __) =>
             {
-                __.Init(mingPai[_], () => callBack?.Invoke(_));
+                __.Init(mingPai[_], () =>
+                {
+                    int i = _;
+                    callBack?.Invoke(i);
+                });
             });
         }
 

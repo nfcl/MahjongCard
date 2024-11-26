@@ -19,11 +19,6 @@ namespace Checker
         public int signCardNum;
         public bool isLastDrewCardExsist;
 
-        public void SwitchLastDrewCard(bool enable)
-        {
-            isLastDrewCardExsist = enable;
-        }
-
         public override string ToString()
         {
             return $"{BlockKindExtexsion.ToString(kind)} {signCardKind} {signCardNum}";

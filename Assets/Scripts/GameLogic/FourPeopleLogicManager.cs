@@ -32,10 +32,6 @@ namespace GameLogic
                 .First(_ => _.player.playerIndex == player.playerIndex)
                 .choices.First(_ => _.kind == kind) as T;
         }
-        public void NextPlayer()
-        {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
-        }
         public Choice[] GetChoiceAfterDrawCard(bool isLingShang)
         {
             List<Choice> choices = new List<Choice>
@@ -100,7 +96,7 @@ namespace GameLogic
             //吃
             {
                 if (
-                    (other.playerIndex + DataManager.playerNum) % DataManager.playerNum == self.playerIndex
+                    (other.playerIndex + 1) % DataManager.playerNum == self.playerIndex
                     && self.CheckChi(out ChoiceChi choice, self.playerIndex, playedCard)
                 )
                 {
@@ -121,6 +117,74 @@ namespace GameLogic
                     choices.Add(ChoiceRongHe.RongHe());
                 }
             }
+            return choices.ToArray();
+        }
+        public Choice[] GetChoiceAfterMingMingCard(LogicPlayer player, LogicMingPaiGroup group)
+        {
+            List<Choice> choices = new List<Choice>();
+
+            //打牌 食替相关 吃或碰了什么牌就不能在本回合打出相同的牌
+            if (group.kind == MingPaiKind.Chi)
+            {
+                int pos = group.OtherCardPosition();
+                if (pos == 0)
+                {
+                    if (group.otherCard.huaseNum + 3 <= 8)
+                    {
+                        choices.Add(ChoicePlayCard.BanPlayCard(
+                            new CardKind[]
+                            {
+                                    group.otherCard,
+                                    new CardKind(group.otherCard.huaseKind, group.otherCard.huaseNum + 3)
+                            }
+                        ));
+                    }
+                    else
+                    {
+                        choices.Add(ChoicePlayCard.BanPlayCard(
+                            new CardKind[]
+                            {
+                                    group.otherCard
+                            }
+                        ));
+                    }
+                }
+                else if (pos == 1)
+                {
+                    choices.Add(ChoicePlayCard.BanPlayCard(new CardKind[] { group.otherCard }));
+                }
+                else if (pos == 2)
+                {
+                    if (group.otherCard.huaseNum - 3 >= 0)
+                    {
+                        choices.Add(ChoicePlayCard.BanPlayCard(
+                            new CardKind[]
+                            {
+                                    group.otherCard,
+                                    new CardKind(group.otherCard.huaseKind, group.otherCard.huaseNum - 3)
+                            }
+                        ));
+                    }
+                    else
+                    {
+                        choices.Add(ChoicePlayCard.BanPlayCard(
+                            new CardKind[]
+                            {
+                                    group.otherCard
+                            }
+                        ));
+                    }
+                }
+            }
+            else if (group.kind == MingPaiKind.Peng)
+            {
+                choices.Add(ChoicePlayCard.BanPlayCard(new CardKind[] { group.otherCard }));
+            }
+            else
+            {
+                choices.Add(ChoicePlayCard.NormalPlayCard());
+            }
+
             return choices.ToArray();
         }
         public int CountPlayerLastCardNum(int playerIndex, CardKind card)
@@ -194,10 +258,43 @@ namespace GameLogic
         /// <summary>
         /// 玩家回合开始事件
         /// </summary>
-        /// <param name="player"></param>
-        public virtual void OnPlayerRoundStart()
+        public virtual void OnPlayerRoundStart(LogicPlayer player, bool needDrawCard)
         {
-            OnPlayerDrawCard(currentPlayer, paiShan.GetDrawCard(), false);
+            currentPlayerIndex = player.playerIndex;
+
+            if (needDrawCard)
+            {
+                OnPlayerDrawCard(currentPlayer, paiShan.GetDrawCard(), false);
+            }
+            else
+            {
+                playerChoices = null;
+
+                WaitPlayer<Action> waitPlayer = WaitPlayer<Action>.WaitForPlayerSelect(
+                    player,
+                    new ActionPlayCard(player.LastDrewCard)
+                );
+                wait = new Wait<Action>(
+                    new WaitPlayer<Action>[] { waitPlayer },
+                    _ =>
+                    {
+                        ProcessMingMingCardChoices(_[0].Item1, _[0].Item2);
+                    }
+                );
+
+                LogicMingPaiGroup group = player.ming.groups.Last();
+
+                Choice[] choices = GetChoiceAfterMingMingCard(player, group);
+
+                playerChoices = new (LogicPlayer player, Choice[] choices)[]
+                {
+                    (player, choices)
+                };
+
+                OnSendPlayerChoice(player, wait.uuid, choices, true);
+
+                wait.AlarmStartAll(this);
+            }
         }
         private void ProcessDrawCardChoices(LogicPlayer player, Action action)
         {
@@ -220,7 +317,7 @@ namespace GameLogic
                             data.choices[totalAction.index].kind switch
                             {
                                 ChoiceGang.GangKind.AnGang => MingPaiKind.AnGang,
-                                ChoiceGang.GangKind.JiaGang => MingPaiKind.JiaGang,
+                                    ChoiceGang.GangKind.JiaGang => MingPaiKind.JiaGang,
                                 _ => throw new System.Exception("抽牌时不应存在明杠")
                             },
                             data.choices[totalAction.index].cards
@@ -270,14 +367,35 @@ namespace GameLogic
                     }
                 case ActionKind.Peng:
                     {
+                        ActionPeng totalAction = firstChoice.Item2 as ActionPeng;
+                        ChoicePeng data = GetPlayerChoice<ChoicePeng>(firstChoice.Item1, ChoiceKind.Peng);
+                        OnPlayerMingCard(firstChoice.Item1, MingPaiKind.Peng, data.choices[totalAction.index]);
                         break;
                     }
                 case ActionKind.Chi:
                     {
+                        ActionChi totalAction = firstChoice.Item2 as ActionChi;
+                        ChoiceChi data = GetPlayerChoice<ChoiceChi>(firstChoice.Item1, ChoiceKind.Chi);
+                        OnPlayerMingCard(firstChoice.Item1, MingPaiKind.Chi, data.choices[totalAction.index]);
                         break;
                     }
                 case ActionKind.Skip:
                     {
+                        OnPlayerRoundEnd(currentPlayer);
+                        break;
+                    }
+            }
+        }
+        private void ProcessMingMingCardChoices(LogicPlayer player, Action action)
+        {
+            wait = null;
+
+            switch (action.kind)
+            {
+                case ActionKind.PlayCard:
+                    {
+                        ActionPlayCard totalAction = action as ActionPlayCard;
+                        OnPlayerPlayCard(player, totalAction.card, false);
                         break;
                     }
             }
@@ -289,8 +407,8 @@ namespace GameLogic
         public virtual void AfterPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang)
         {
             WaitPlayer<Action> waitPlayer = WaitPlayer<Action>.WaitForPlayerSelect(
-                currentPlayer,
-                new ActionPlayCard(currentPlayer.LastDrewCard)
+                player,
+                new ActionPlayCard(player.LastDrewCard)
             );
             wait = new Wait<Action>(
                 new WaitPlayer<Action>[] { waitPlayer },
@@ -361,18 +479,94 @@ namespace GameLogic
 
         public virtual void OnPlayerMingCard(LogicPlayer player, MingPaiKind kind, CardKind[] cards)
         {
-
+            switch (kind)
+            {
+                case MingPaiKind.Peng:
+                    {
+                        LogicMingPaiGroup group = new LogicMingPaiGroup
+                        {
+                            kind = MingPaiKind.Peng,
+                            otherCard = cards[2],
+                            selfCard = cards.Take(2).ToArray(),
+                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            signKind = cards[0].huaseKind,
+                            signNum = cards[0].huaseNum
+                        };
+                        player.MingMingPai(currentPlayer, group);
+                        break;
+                    }
+                case MingPaiKind.Chi:
+                    {
+                        CardKind signCard = cards.OrderBy(_ => _.huaseNum).First();
+                        LogicMingPaiGroup group = new LogicMingPaiGroup
+                        {
+                            kind = MingPaiKind.Chi,
+                            otherCard = cards[2],
+                            selfCard = cards.Take(2).ToArray(),
+                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            signKind = signCard.huaseKind,
+                            signNum = signCard.huaseNum
+                        };
+                        player.MingMingPai(currentPlayer, group);
+                        break;
+                    }
+                case MingPaiKind.MingGang:
+                    {
+                        LogicMingPaiGroup group = new LogicMingPaiGroup
+                        {
+                            kind = MingPaiKind.MingGang,
+                            otherCard = cards[3],
+                            selfCard = cards.Take(3).ToArray(),
+                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            signKind = cards[0].huaseKind,
+                            signNum = cards[0].huaseNum
+                        };
+                        player.MingMingPai(currentPlayer, group);
+                        break;
+                    }
+                case MingPaiKind.AnGang:
+                    {
+                        LogicMingPaiGroup group = new LogicMingPaiGroup
+                        {
+                            kind = MingPaiKind.AnGang,
+                            otherCard = new CardKind(-1),
+                            selfCard = cards,
+                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            signKind = cards[0].huaseKind,
+                            signNum = cards[0].huaseNum
+                        };
+                        player.AnMingPai(group);
+                        break;
+                    }
+                case MingPaiKind.JiaGang:
+                    {
+                        player.JiaGang(cards[3]);
+                        break;
+                    }
+                case MingPaiKind.BaBei:
+                    {
+                        LogicMingPaiGroup group = new LogicMingPaiGroup
+                        {
+                            kind = MingPaiKind.BaBei,
+                            otherCard = new CardKind(-1),
+                            selfCard = cards,
+                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            signKind = cards[0].huaseKind,
+                            signNum = cards[0].huaseNum
+                        };
+                        player.AnMingPai(group);
+                        break;
+                    }
+            }
         }
 
         public virtual void OnSendPlayerChoice(LogicPlayer player, long uuid, Choice[] choices, bool isDrawCard) { }
 
         public virtual void OnPlayerRoundEnd(LogicPlayer player)
         {
-            NextPlayer();
-
-            DOTween.Sequence().AppendInterval(2).AppendCallback(() =>
+            DOTween.Sequence().AppendInterval(1).AppendCallback(() =>
             {
-                OnPlayerRoundStart();
+                OnPlayerRoundStart(players[(currentPlayerIndex + 1) % DataManager.playerNum], true);
             });
         }
     }

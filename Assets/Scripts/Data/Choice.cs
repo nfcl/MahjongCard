@@ -57,6 +57,14 @@ namespace Data
                 isWhite = false,
             };
         }
+        public static ChoicePlayCard BanPlayCard(CardKind[] cards)
+        {
+            return new ChoicePlayCard()
+            {
+                cards = cards,
+                isWhite = false
+            };
+        }
     }
     public class ChoiceLiZhi : Choice
     {

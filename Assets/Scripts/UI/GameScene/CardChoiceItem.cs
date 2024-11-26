@@ -9,10 +9,10 @@ namespace GameSceneUI
     public class CardChoiceItem : MonoBehaviour
     {
         public CardChoiceUI[] cards;
-        public BoxCollider2D clickChecker;
+        public RectTransform clickChecker;
         public D_Void_Void callBack;
 
-        private void OnMouseUpAsButton()
+        public void OnClick()
         {
             callBack?.Invoke();
         }

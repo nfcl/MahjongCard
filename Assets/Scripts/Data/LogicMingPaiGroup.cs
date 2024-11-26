@@ -15,13 +15,11 @@ namespace Data
         {
             if(kind == MingPaiKind.BaBei || kind == MingPaiKind.AnGang)
             {
-                return selfCard;
+                return selfCard.Clone() as CardKind[];
             }
             else
             {
-                CardKind[] result = new CardKind[selfCard.Length + 1];
-                result[selfCard.Length] = otherCard;
-                return result;
+                return selfCard.Append(otherCard).ToArray();
             }
         }
         public bool ExsistYaoJiu => otherCard.isYaoJiu || selfCard.Any(_ => _.isYaoJiu);
@@ -44,12 +42,25 @@ namespace Data
                         MingPaiKind.MingGang => 4,
                         MingPaiKind.AnGang => 4,
                         MingPaiKind.Peng => 3,
-                        MingPaiKind.Chi => throw new System.NotImplementedException(),
+                        MingPaiKind.JiaGang => 4,
                         _ => throw new System.NotImplementedException(),
                     };
                 }
             }
             return 0;
+        }
+        public void JiaGang(CardKind card)
+        {
+            selfCard = selfCard.Append(card).ToArray();
+            kind = MingPaiKind.JiaGang;
+        }
+        public int OtherCardPosition()
+        {
+            if(kind != MingPaiKind.Chi)
+            {
+                throw new System.Exception("不是吃不允许调用 OtherCardIsZhongZhang");
+            }
+            return otherCard.huaseNum - signNum;
         }
     }
 }

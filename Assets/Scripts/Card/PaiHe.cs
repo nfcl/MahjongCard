@@ -109,7 +109,10 @@ namespace Card
         {
             var card = cards.Last(_ => _.card.faceKind == kind);
             cards.Remove(card);
-            chunkIndex = cards[cards.Count - 1].chunk;
+            if(cards.Count != 0)
+            {
+                chunkIndex = cards[cards.Count - 1].chunk;
+            }
             return card.card;
         }
     }

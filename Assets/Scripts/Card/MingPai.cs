@@ -22,7 +22,18 @@ namespace Card
         {
             MingPaiGroup newGroup = GameObject.Instantiate(DesktopManager.instance.mingGroupPrefab, this.transform);
 
-            newGroup.Init(kind, cards, fromPeople);
+            float width = newGroup.Init(kind, cards, fromPeople);
+
+            if (groups.Count > 0)
+            {
+                newGroup.transform.localPosition = new Vector3(groups.Last().transform.localPosition.x - width, 0, 0);
+            }
+            else
+            {
+                newGroup.transform.localPosition = new Vector3(-width, 0, 0);
+            }
+
+            groups.Add(newGroup);
         }
 
         public void JiaGang(RealCard jiaGang)

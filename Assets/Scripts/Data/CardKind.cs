@@ -38,7 +38,7 @@ namespace Data
         }
         public CardKind(int kind, int num)
         {
-            value = kind * 10 + num + kind == 3 ? 0 : 1;
+            value = kind * 10 + num + (kind == 3 ? 0 : 1);
         }
 
         public static bool operator ==(CardKind self, CardKind other)
@@ -76,7 +76,7 @@ namespace Data
                 < 20 => $"{value - 10}p",
                 < 30 => $"{value - 20}s",
                 _ => $"{value - 30}z",
-            } + $"kind = {huaseKind} num = {huaseNum}";
+            } + $" kind = {huaseKind} num = {huaseNum}";
         }
         public static string ToString(CardKind[] kinds)
         {

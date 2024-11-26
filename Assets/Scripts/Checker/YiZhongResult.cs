@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEditor;
 
 namespace Checker
@@ -19,7 +18,7 @@ namespace Checker
         }
         public YiZhongResult(YiZhongResult other)
         {
-            yizhongs = new List<Yi>(yizhongs);
+            yizhongs = new List<Yi>(other.yizhongs);
             fanNum = other.fanNum;
         }
         public void Add(Yi yi)
@@ -306,7 +305,9 @@ namespace Checker
 
             for(int i = 0; i < exsistLastDrewCardBlocks.Length; ++i)
             {
-                tingPai.blocks[i].SwitchLastDrewCard(true);
+                var temp = tingPai.blocks[i];
+                temp.isLastDrewCardExsist = true;
+                tingPai.blocks[i] = temp;
 
                 YiZhongResult newResult = _CheckNormalYiZhong(infos, lastDrewCard, tingPai, mings, fanDecoder);
 
@@ -315,7 +316,9 @@ namespace Checker
                     maxResult = newResult;
                 }
 
-                tingPai.blocks[i].SwitchLastDrewCard(false);
+                temp = tingPai.blocks[i];
+                temp.isLastDrewCardExsist = false;
+                tingPai.blocks[i] = temp;
             }
 
             return maxResult;

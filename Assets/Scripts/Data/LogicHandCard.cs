@@ -36,6 +36,10 @@ namespace Data
                 cards.Remove(card);
             }
         }
+        public void BeMingedCard(CardKind card)
+        {
+            cards.Remove(card);
+        }
         public CardKind[][] CheckChi(CardKind other)
         {
             if (other.huaseKind == 3)
@@ -46,10 +50,10 @@ namespace Data
 
             CardKind[][] cardsOrderedPosition = new CardKind[4][]
             {
-                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum - 2))).ToArray(),
-                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum - 1))).ToArray(),
-                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum + 1))).ToArray(),
-                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum + 2))).ToArray()
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum - 2))),
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum - 1))),
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum + 1))),
+                CardKind.Divider(cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, other.huaseKind, other.huaseNum + 2)))
             };
 
             cardsOrderedPosition[0].Foreach((_, index) =>

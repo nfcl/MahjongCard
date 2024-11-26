@@ -1,11 +1,9 @@
 using Data;
-using DG.Tweening;
 using GameLogic;
 using GameSceneUI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -319,7 +317,7 @@ namespace Card
                 if(currentRoundTime != 0)
                 {
                     yield return new WaitUntil(() => currentRoundTime != Mathf.CeilToInt(roundTime - (Time.realtimeSinceStartup - startTime)));
-                    Debug.Log($"currentRoundTime = {currentRoundTime}\nroundTime - (Time.realtimeSinceStartup - startTime)) = {roundTime - (Time.realtimeSinceStartup - startTime)}");
+                    //Debug.Log($"currentRoundTime = {currentRoundTime}\nroundTime - (Time.realtimeSinceStartup - startTime)) = {roundTime - (Time.realtimeSinceStartup - startTime)}");
                     currentRoundTime = Mathf.CeilToInt(roundTime - (Time.realtimeSinceStartup - startTime));
                     SetAlarmText(currentRoundTime, currentGlobalTime);
                 }

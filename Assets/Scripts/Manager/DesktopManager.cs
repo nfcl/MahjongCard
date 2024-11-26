@@ -63,7 +63,7 @@ public class DesktopManager : MonoBehaviour
 
         RealCard[] handCard = handCards[relativeSelfIndex].MingCard(new CardKind[] { gang });
 
-        mingCards[selfPlayerIndex].JiaGang(handCard[0]);
+        mingCards[relativeSelfIndex].JiaGang(handCard[0]);
     }
     public void OnPlayerPlayCard(int playerIndex, CardKind card, bool isZhi)
     {
@@ -108,5 +108,9 @@ public class DesktopManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
+
+        Vector3 myHandCardPos = handCards[0].transform.localPosition;
+        myHandCardPos.y = -1;
+        handCards[0].transform.localPosition = myHandCardPos;
     }
 }

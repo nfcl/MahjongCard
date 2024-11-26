@@ -26,6 +26,12 @@ namespace Data
         {
             groups.Add(group);
         }
+        public void JiaGang(CardKind card)
+        {
+            groups
+                .First(_ => _.kind == MingPaiKind.Peng && CardKind.LogicEqualityComparer.Equals(card, _.signKind, _.signNum))
+                .JiaGang(card);
+        }
         public int Count()
         {
             return groups.Count;

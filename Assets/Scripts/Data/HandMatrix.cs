@@ -95,11 +95,9 @@ namespace Data
             {
                 return false;
             }
-            if (!matrix[huaseKind].TakeWhile((_, index) => num <= index && index < num + 3).All(_ => _ >= num))
-            {
-                return false;
-            }
-            return true;
+            return matrix[huaseKind][huaseNum + 0] >= num
+                && matrix[huaseKind][huaseNum + 1] >= num
+                && matrix[huaseKind][huaseNum + 2] >= num;
         }
         public void ExtractShun(int huaseKind, int huaseNum, int num = 1)
         {

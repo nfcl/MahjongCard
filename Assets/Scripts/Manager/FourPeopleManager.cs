@@ -10,6 +10,7 @@ using Message;
 using DG.Tweening;
 using System.Text;
 using UnityEditor;
+using MainSceneUI;
 
 namespace Manager
 {
@@ -109,10 +110,7 @@ namespace Manager
                 {
                     GameSceneUIManager.instance.gamePanel.handCard.ConfigurInitialHandCard(_.cards);
                 }
-                else
-                {
-                    DesktopManager.instance.handCards[GetAbsolutePlayerIndex(index)].ConfigurCard(_.cards);
-                }
+                DesktopManager.instance.handCards[GetAbsolutePlayerIndex(index)].ConfigurCard(_.cards);
             });
         }
         [ClientRpc]
@@ -178,7 +176,93 @@ namespace Manager
                     {
                         ActionPlayCard total = action as ActionPlayCard;
                         actionString.Append($"打出{total.card}");
-                        wait.PlayerComplete(players[playerIndex], action);
+                        var result = wait.PlayerComplete(players[playerIndex], action);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.Skip:
+                    {
+                        actionString.Append("跳过");
+                        var result = wait.PlayerComplete(players[playerIndex], action as ActionSkip);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.LiZhi:
+                    {
+                        ActionLiZhi total = action as ActionLiZhi;
+                        actionString.Append($"立直 {total.card}");
+                        var result = wait.PlayerComplete(players[playerIndex], total);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.Gang:
+                    {
+                        ActionGang total = action as ActionGang;
+                        actionString.Append($"{(playerChoices.First(_ => _.player.playerIndex == playerIndex).choices.First(_ => _.kind == ChoiceKind.Gang) as ChoiceGang).choices[total.index].kind}");
+                        var result = wait.PlayerComplete(players[playerIndex], total);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.Chi:
+                    {
+                        actionString.Append("吃");
+                        var result = wait.PlayerComplete(players[playerIndex], action as ActionChi);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.Peng:
+                    {
+                        actionString.Append("碰");
+                        var result = wait.PlayerComplete(players[playerIndex], action as ActionPeng);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.JiuZhongJiuPai:
+                    {
+                        actionString.Append("九种九牌");
+                        var result = wait.PlayerComplete(players[playerIndex], action as ActionJiuZhongJiuPai);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.ZiMo:
+                    {
+                        actionString.Append("自摸");
+                        var result = wait.PlayerComplete(players[playerIndex], action as ActionZimo);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
+                        break;
+                    }
+                case ActionKind.RongHe:
+                    {
+                        actionString.Append("荣和");
+                        var result = wait.PlayerComplete(players[playerIndex], action as ActionRongHe);
+                        if (!result.result)
+                        {
+                            actionString.Append($"\n\t失败 : {result.reason}");
+                        }
                         break;
                     }
             }
@@ -275,7 +359,7 @@ namespace Manager
 
             DOTween.Sequence()
                 .AppendInterval(3f)
-                .AppendCallback(() => OnPlayerRoundStart());
+                .AppendCallback(() => OnPlayerRoundStart(players[0], true));
         }
 
         #endregion
@@ -283,9 +367,9 @@ namespace Manager
         #region 玩家回合
 
         [Server]
-        public override void OnPlayerRoundStart()
+        public override void OnPlayerRoundStart(LogicPlayer player, bool needDrawCard)
         {
-            base.OnPlayerRoundStart();
+            base.OnPlayerRoundStart(player, needDrawCard);
 
             RpcOnPlayerRound(currentPlayerIndex);
         }
@@ -326,10 +410,7 @@ namespace Manager
             {
                 GameSceneUIManager.instance.gamePanel.handCard.DrawCard(message.card, true);
             }
-            else
-            {
-                DesktopManager.instance.handCards[GetAbsolutePlayerIndex(message.playerIndex)].DrawCard(message.card);
-            }
+            DesktopManager.instance.handCards[GetAbsolutePlayerIndex(message.playerIndex)].DrawCard(message.card);
         }
 
         #endregion
@@ -351,11 +432,78 @@ namespace Manager
             if(roomIndex == playerIndex)
             {
                 GameSceneUIManager.instance.gamePanel.handCard.PlayCard(card);
-                DesktopManager.instance.paiHes[0].CreateCard(card, isLiZhi);
+            }
+            DesktopManager.instance.OnPlayerPlayCard(playerIndex, card, isLiZhi);
+        }
+
+        #endregion
+
+        #region 玩家鸣牌
+
+        public override void OnPlayerMingCard(LogicPlayer player, MingPaiKind kind, CardKind[] cards)
+        {
+            base.OnPlayerMingCard(player, kind, cards);
+
+            LogicMingPaiGroup group = player.ming.groups.Last();
+
+            if (kind == MingPaiKind.AnGang || kind == MingPaiKind.BaBei)
+            {//暗杠，拔北
+                RpcMingPai(player.playerIndex, group.kind, group.selfCard);
+            }
+            else
+            {//吃，碰，明杠，加杠
+                RpcMingPai(player.playerIndex, currentPlayerIndex, group.kind, group.selfCard, group.otherCard);
+            }
+
+            OnPlayerRoundStart(player, player.playerIndex == currentPlayerIndex);
+        }
+        [ClientRpc]
+        public void RpcMingPai(int mingPlayerIndex, MingPaiKind kind, CardKind[] selfCards)
+        {
+            if (mingPlayerIndex == roomIndex)
+            {
+                //自己鸣牌需要额外处理UI手牌
+                GameSceneUIManager.instance.gamePanel.handCard.MingCard(selfCards);
+            }
+            if (kind == MingPaiKind.BaBei)
+            {
+                DesktopManager.instance.BaBei(mingPlayerIndex);
+            }
+            else if (kind == MingPaiKind.AnGang)
+            {
+                DesktopManager.instance.AnMingPai(kind, mingPlayerIndex, selfCards);
             }
             else
             {
-                DesktopManager.instance.OnPlayerPlayCard(playerIndex, card, isLiZhi);
+                throw new Exception($"不被允许的鸣牌类型 {kind}");
+            }
+        }
+        [ClientRpc]
+        public void RpcMingPai(int mingPlayerIndex, int mingedPlayerIndex, MingPaiKind kind, CardKind[] selfCards, CardKind otherCard)
+        {
+            if (mingPlayerIndex == roomIndex)
+            {
+                //自己鸣牌需要额外处理UI手牌
+                if(kind == MingPaiKind.JiaGang)
+                {
+                    GameSceneUIManager.instance.gamePanel.handCard.MingCard(selfCards[2]);
+                }
+                else
+                {
+                    GameSceneUIManager.instance.gamePanel.handCard.MingCard(selfCards);
+                }
+            }
+            if (kind == MingPaiKind.JiaGang)
+            {
+                DesktopManager.instance.JiaGang(mingPlayerIndex, selfCards[2]);
+            }
+            else if (kind == MingPaiKind.Peng || kind == MingPaiKind.Chi || kind == MingPaiKind.MingGang)
+            {
+                DesktopManager.instance.MingMingPai(kind, mingPlayerIndex, mingedPlayerIndex, otherCard, selfCards);
+            }
+            else
+            {
+                throw new Exception($"不被允许的鸣牌类型 {kind}");
             }
         }
 

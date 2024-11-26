@@ -38,18 +38,31 @@ namespace Data
         {
             return Time.realtimeSinceStartup - startTime;
         }
-        public (bool, string) PlayerComplete(LogicPlayer player, T data)
+        public (bool result, string reason) PlayerComplete(LogicPlayer player, T data)
         {
+            Debug.Log("TryPlayerComplete");
+
             WaitPlayer<T> wait = waits.Where(_ => _.player.playerIndex == player.playerIndex).FirstOrDefault();
+
+            Debug.Log("FindWait");
+
             if (wait == null)
             {
+                Debug.Log("不在等待列表的玩家提交数据");
                 return (false, "不在等待列表的玩家提交数据");
             }
             else if (wait.isComplete)
             {
+                Debug.Log("玩家已提交过数据");
                 return (false, "玩家已提交过数据");
             }
+
+            Debug.Log($"{waits.Count(_ => _.isComplete)} / {waits.Length}");
+
             wait.OnComplete(data);
+
+            Debug.Log($"{waits.Count(_ => _.isComplete)} / {waits.Length}");
+            
             return (true, null);
         }
         public void OnSingleComplete(int index, T data)

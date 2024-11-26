@@ -1,4 +1,5 @@
 using Data;
+using System.Linq;
 using UnityEngine;
 
 namespace Card
@@ -13,12 +14,14 @@ namespace Card
         {
             x += (isHorizental ? 0.18f : 0.14f);
             card.transform.parent = this.transform;
-            card.transform.localEulerAngles = new Vector3(0, isHorizental ? 90 : 0, isFanMian ? -90 : 90);
             card.transform.localPosition = new Vector3(x, 0.135f, isHorizental ? (isJiaGang ? 0.23f : -0.0423f) : 0);
+            card.Init(this, isHorizental, isFanMian, isJiaGang); 
             return x + (isHorizental ? 0.18f : 0.14f);
         }
         public float Init(MingPaiKind kind, RealCard[] cards, int fromPeople)
         {
+            cards = cards.Reverse().ToArray();
+            fromPeople = cards.Length - 1 - fromPeople;
             this.kind = kind;
             this.cards = cards;
             this.fromPeople = fromPeople;
@@ -47,7 +50,7 @@ namespace Card
         public void JiaGang(RealCard card)
         {
             kind = MingPaiKind.JiaGang;
-            Init(fromPeople * 0.28f + 0.18f, card, true, false, true);
+            Init(fromPeople * 0.28f, card, true, false, true);
         }
     }
 }

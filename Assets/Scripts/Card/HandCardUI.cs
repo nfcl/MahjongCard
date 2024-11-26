@@ -181,5 +181,22 @@ namespace Card
             cards[dest] = card;
             card.handIndex = dest;
         }
+        public void MingCard(CardKind kind)
+        {
+            var card = this.cards.First(__ => __.faceKind == kind);
+            this.cards.Remove(card);
+            DestroyImmediate(card.gameObject);
+            FormatCard();
+        }
+        public void MingCard(CardKind[] kinds)
+        {
+            kinds.Foreach((_, index) =>
+            {
+                var card = this.cards.First(__ => __.faceKind == _);
+                this.cards.Remove(card);
+                DestroyImmediate(card.gameObject);
+                FormatCard();
+            });
+        }
     }
 }

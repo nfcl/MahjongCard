@@ -18,8 +18,9 @@ namespace Data
         {
             cards = new CardKind[34 * 4];
             int num = 0;
+
             for (int i = 0; i < 37; ++i)
-            {   
+            {
                 if (i == 0 || i == 10 || i == 20)
                 {
                     cards[num++] = new CardKind(i);
@@ -27,13 +28,26 @@ namespace Data
                 else if (i == 5 || i == 15 || i == 25)
                 {
                     cards[num++] = new CardKind(i);
-                    cards[num++] = new CardKind(i);
-                    cards[num++] = new CardKind(i);
                 }
                 else
                 {
                     cards[num++] = new CardKind(i);
                     cards[num++] = new CardKind(i);
+                }
+            }
+
+            for (int i = 0; i < 37; ++i)
+            {
+                if (i == 0 || i == 10 || i == 20)
+                {
+                    cards[num++] = new CardKind(i);
+                }
+                else if (i == 5 || i == 15 || i == 25)
+                {
+                    cards[num++] = new CardKind(i);
+                }
+                else
+                {
                     cards[num++] = new CardKind(i);
                     cards[num++] = new CardKind(i);
                 }
@@ -41,7 +55,7 @@ namespace Data
             lingShang = 0;
             baoPai = 1;
             drawCard = 0;
-            Randomize(seed);
+            //Randomize(seed);
         }
         private void Randomize(int seed)
         {

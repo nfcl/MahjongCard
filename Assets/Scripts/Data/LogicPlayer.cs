@@ -62,33 +62,21 @@ namespace Data
             paiHe.PlayCard(card);
             zhenTingRecoder[card.huaseKind * 9 + card.huaseNum] = true;
         }
-        public void Peng(LogicPlayer otherPlayer, LogicMingPaiGroup group)
+        public void MingMingPai(LogicPlayer otherPlayer, LogicMingPaiGroup group)
         {
             otherPlayer.paiHe.BeMingedCard(group.otherCard);
             hand.BeMingedCard(group);
             ming.MingCard(group);
         }
-        public void Chi(LogicPlayer otherPlayer, LogicMingPaiGroup group)
-        {
-            otherPlayer.paiHe.BeMingedCard(group.otherCard);
-            hand.BeMingedCard(group);
-            ming.MingCard(group);
-        }
-        public void MingGang(LogicPlayer otherPlayer, LogicMingPaiGroup group)
-        {
-            otherPlayer.paiHe.BeMingedCard(group.otherCard);
-            hand.BeMingedCard(group);
-            ming.MingCard(group);
-        }
-        public void AnGang(LogicMingPaiGroup group)
+        public void AnMingPai(LogicMingPaiGroup group)
         {
             hand.BeMingedCard(group);
             ming.MingCard(group);
         }
-        public void BaBei(LogicMingPaiGroup group)
+        public void JiaGang(CardKind card)
         {
-            hand.BeMingedCard(group);
-            ming.MingCard(group);
+            hand.BeMingedCard(card);
+            ming.JiaGang(card);
         }
         public bool CheckChi(out ChoiceChi choice, int fromPeople, CardKind other)
         {
