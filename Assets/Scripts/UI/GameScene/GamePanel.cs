@@ -87,6 +87,7 @@ namespace Card
             }
             else if (currentMode == ChoiceKind.LiZhi)
             {
+                liZhiCancelButton.gameObject.SetActive(false);
                 if (SubmitAction(new ActionLiZhi(card.faceKind)))
                 {
                     handCard.lastCard = card;
