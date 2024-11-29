@@ -162,6 +162,7 @@ namespace Card
                                     tingPaiChoices = totalChoice.choices;
                                     handCard.BanCard(totalChoice);
                                     currentMode = ChoiceKind.LiZhi;
+                                    choicePanel.Close();
                                     liZhiCancelButton.gameObject.SetActive(true);
                                 }
                             ));
