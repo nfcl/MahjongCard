@@ -50,7 +50,7 @@ namespace Card
         }
         public void UnBanCard()
         {
-            cards.ForEach(_ => _.IsInteractable = true);
+            cards.ForEach(_ => _.IsInteractableWithColor = true);
         }
         public void BanCard()
         {
