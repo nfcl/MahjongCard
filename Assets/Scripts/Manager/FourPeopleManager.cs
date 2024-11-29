@@ -369,9 +369,9 @@ namespace Manager
         [Server]
         public override void OnPlayerRoundStart(LogicPlayer player, bool needDrawCard)
         {
-            base.OnPlayerRoundStart(player, needDrawCard);
-
             RpcOnPlayerRound(currentPlayerIndex);
+
+            base.OnPlayerRoundStart(player, needDrawCard);
         }
         [ClientRpc]
         public void RpcOnPlayerRound(int playerIndex)
