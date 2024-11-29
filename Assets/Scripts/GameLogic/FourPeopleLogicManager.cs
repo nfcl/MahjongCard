@@ -58,8 +58,11 @@ namespace GameLogic
                 );
                 if (clientTingPaiChoice.cards.Length != 0)
                 {
+                    if (currentPlayer.ming.mingInfo.isMenQianQing)
+                    {
                     //立直
                     choices.Add(ChoiceLiZhi.LiZhi(clientTingPaiChoice));
+                    }
                     //自摸
                     if (tingPaiChoice.isHePai)
                     {
