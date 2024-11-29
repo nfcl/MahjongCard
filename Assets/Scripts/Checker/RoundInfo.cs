@@ -20,6 +20,9 @@ namespace Checker
         public bool isZhuang;
         public bool isLiZhi;
         public bool isLiangLiZhi;
+        /// <summary>
+        /// 一发取消的时机:打出一张牌|别人鸣牌|自己暗杠
+        /// </summary>
         public bool hasYiFa;
     }
     public struct HePaiInfo

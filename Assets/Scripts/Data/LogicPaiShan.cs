@@ -40,7 +40,7 @@ namespace Data
             {
                 if (i == 0 || i == 10 || i == 20)
                 {
-                    cards[num++] = new CardKind(i);
+                    cards[num++] = new CardKind(i + 5);
                 }
                 else if (i == 5 || i == 15 || i == 25)
                 {

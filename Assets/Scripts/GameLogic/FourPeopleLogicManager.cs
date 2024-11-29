@@ -326,12 +326,19 @@ namespace GameLogic
                     }
                 case ActionKind.LiZhi:
                     {
+                        ActionLiZhi totalAction = action as ActionLiZhi;
+                        CardKind liZhiCard = totalAction.card;
+                        OnPlayerPlayCard(player, liZhiCard, true);
                         break;
                     }
                 case ActionKind.ZiMo:
                     {
                         break;
                     }
+                default:
+                    {
+                        throw new System.Exception($"抽牌时不应存在该类型的操作{action.kind}");
+                    } 
             }
         }//和 > 碰/杠 > 吃
         private void ProcessPlayCardChoices((LogicPlayer,Action)[] playerChoices)
@@ -434,6 +441,19 @@ namespace GameLogic
         /// </summary>
         public virtual void OnPlayerPlayCard(LogicPlayer player, CardKind card, bool isLiZhi)
         {
+            if (isLiZhi)
+            {
+                if (roundInfo.isNoBodyMingPai && player.selfInfo.drewCardNum == 1)
+                {
+                    player.selfInfo.isLiangLiZhi = true;
+                }
+                else
+                {
+                    player.selfInfo.isLiZhi = true;
+                }
+                player.selfInfo.hasYiFa = true;
+            }
+
             player.PlayCard(card);
         }
 
@@ -558,6 +578,22 @@ namespace GameLogic
                         break;
                     }
             }
+
+            if(kind == MingPaiKind.AnGang)
+            {
+                player.selfInfo.hasYiFa = false;
+            }
+            else
+            {
+                players.Foreach((_, _index) =>
+                {
+                    if (_index != player.playerIndex)
+                    {
+                        _.selfInfo.hasYiFa = false;
+                    }
+                });
+            }
+
         }
 
         public virtual void OnSendPlayerChoice(LogicPlayer player, long uuid, Choice[] choices, bool isDrawCard) { }

@@ -68,7 +68,7 @@ namespace Card
         public void BanCard(ChoiceLiZhi choice)
         {
             HashSet<CardKind> set = choice.choices.cards.Select(_ => _.playCard).ToHashSet(CardKind.LogicEqualityComparer);
-            cards.ForEach(_ => _.IsInteractableWithColor = !set.Contains(_.faceKind, CardKind.LogicEqualityComparer));
+            cards.ForEach(_ => _.IsInteractableWithColor = set.Contains(_.faceKind, CardKind.LogicEqualityComparer));
         }
         public void SyncBaoPai()
         {
