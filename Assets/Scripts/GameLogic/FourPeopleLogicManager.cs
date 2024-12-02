@@ -26,6 +26,25 @@ namespace GameLogic
             isNoBodyMingPai = players.All(_ => !_.ming.isMingPai)
         };
 
+        public ClientEachCardTingPais GetPlayerTingPaiResult(LogicPlayer player, bool isLingShangPai, bool isRongHe)
+        {
+            var tingPaiChoice = EachHandCardTingPaiResult.Check(
+                new CheckInfo
+                {
+                    roundInfo = roundInfo,
+                    selfInfo = player.selfInfo,
+                    mingInfo = player.ming.mingInfo,
+                    hePaiInfo = new HePaiInfo { isLingShangPai = isLingShangPai, isRongHe = isRongHe }
+                },
+                player.hand.Cards, player.ming.Groups, Yi.Default
+            );
+            return ClientEachCardTingPais.Create(
+                tingPaiChoice,
+                1,
+                _ => CountPlayerLastCardNum(player.playerIndex, _),
+                (_, __) => player.zhenTingRecoder[_ * 9 + __]
+            );
+        }
         public T GetPlayerChoice<T>(LogicPlayer player, ChoiceKind kind) where T : Choice
         {
             return playerChoices
@@ -34,37 +53,24 @@ namespace GameLogic
         }
         public Choice[] GetChoiceAfterDrawCard(bool isLingShang)
         {
+            ClientEachCardTingPais clientTingPaiChoice = GetPlayerTingPaiResult(currentPlayer, isLingShang, false);
+
             List<Choice> choices = new List<Choice>
             {
                 //打牌
-                ChoicePlayCard.NormalPlayCard()
+                ChoicePlayCard.NormalPlayCard(clientTingPaiChoice)
             };
             {
-                var tingPaiChoice = EachHandCardTingPaiResult.Check(
-                    new CheckInfo
-                    {
-                        roundInfo = roundInfo,
-                        selfInfo = currentPlayer.selfInfo,
-                        mingInfo = currentPlayer.ming.mingInfo,
-                        hePaiInfo = new HePaiInfo { isLingShangPai = isLingShang, isRongHe = false }
-                    },
-                    currentPlayer.hand.Cards, currentPlayer.ming.Groups, Yi.Default
-                );
-                ClientEachCardTingPais clientTingPaiChoice = ClientEachCardTingPais.Create(
-                    tingPaiChoice,
-                    1,
-                    _ => CountPlayerLastCardNum(currentPlayerIndex, _),
-                    (_, __) => currentPlayer.zhenTingRecoder[_ * 9 + __]
-                );
+
                 if (clientTingPaiChoice.cards.Length != 0)
                 {
                     if (currentPlayer.ming.mingInfo.isMenQianQing)
                     {
-                    //立直
-                    choices.Add(ChoiceLiZhi.LiZhi(clientTingPaiChoice));
+                        //立直
+                        choices.Add(ChoiceLiZhi.LiZhi());
                     }
                     //自摸
-                    if (tingPaiChoice.isHePai)
+                    if (clientTingPaiChoice.isHePai)
                     {
                         choices.Add(ChoiceZiMo.ZiMo());
                     }
@@ -126,6 +132,8 @@ namespace GameLogic
         {
             List<Choice> choices = new List<Choice>();
 
+            ClientEachCardTingPais clientTingPaiChoice = GetPlayerTingPaiResult(player, false, true);
+
             //打牌 食替相关 吃或碰了什么牌就不能在本回合打出相同的牌
             if (group.kind == MingPaiKind.Chi)
             {
@@ -137,9 +145,10 @@ namespace GameLogic
                         choices.Add(ChoicePlayCard.BanPlayCard(
                             new CardKind[]
                             {
-                                    group.otherCard,
-                                    new CardKind(group.otherCard.huaseKind, group.otherCard.huaseNum + 3)
-                            }
+                                group.otherCard,
+                                new CardKind(group.otherCard.huaseKind, group.otherCard.huaseNum + 3)
+                            },
+                            clientTingPaiChoice
                         ));
                     }
                     else
@@ -147,14 +156,15 @@ namespace GameLogic
                         choices.Add(ChoicePlayCard.BanPlayCard(
                             new CardKind[]
                             {
-                                    group.otherCard
-                            }
+                                group.otherCard
+                            },
+                            clientTingPaiChoice
                         ));
                     }
                 }
                 else if (pos == 1)
                 {
-                    choices.Add(ChoicePlayCard.BanPlayCard(new CardKind[] { group.otherCard }));
+                    choices.Add(ChoicePlayCard.BanPlayCard(new CardKind[] { group.otherCard }, clientTingPaiChoice));
                 }
                 else if (pos == 2)
                 {
@@ -163,9 +173,10 @@ namespace GameLogic
                         choices.Add(ChoicePlayCard.BanPlayCard(
                             new CardKind[]
                             {
-                                    group.otherCard,
-                                    new CardKind(group.otherCard.huaseKind, group.otherCard.huaseNum - 3)
+                                group.otherCard,
+                                new CardKind(group.otherCard.huaseKind, group.otherCard.huaseNum - 3)
                             }
+                            , clientTingPaiChoice
                         ));
                     }
                     else
@@ -173,19 +184,20 @@ namespace GameLogic
                         choices.Add(ChoicePlayCard.BanPlayCard(
                             new CardKind[]
                             {
-                                    group.otherCard
-                            }
+                                group.otherCard
+                            },
+                            clientTingPaiChoice
                         ));
                     }
                 }
             }
             else if (group.kind == MingPaiKind.Peng)
             {
-                choices.Add(ChoicePlayCard.BanPlayCard(new CardKind[] { group.otherCard }));
+                choices.Add(ChoicePlayCard.BanPlayCard(new CardKind[] { group.otherCard }, clientTingPaiChoice));
             }
             else
             {
-                choices.Add(ChoicePlayCard.NormalPlayCard());
+                choices.Add(ChoicePlayCard.NormalPlayCard(clientTingPaiChoice));
             }
 
             return choices.ToArray();

@@ -18,18 +18,23 @@ namespace Checker
 
         public bool IsTingPai => normal.Length != 0 || isQiDui || isGuoShi;
         public bool IsWuYi =>
-            normalYiResult.All(_ => _.fanNum == 0)
-            && (isQiDui && qiDuiYiResult.fanNum == 0)
-            && (isGuoShi && guoShiYiResult.fanNum == 0);
+            (normalYiResult.Length == 0 || normalYiResult.All(_ => _.fanNum == 0))
+            && (!isQiDui || qiDuiYiResult.fanNum == 0)
+            && (!isGuoShi || guoShiYiResult.fanNum == 0);
 
         public YiZhongResult BestChoice()
         {
             YiZhongResult result = normalYiResult.OrderByDescending(_ => _.fanNum).FirstOrDefault();
 
-            if (isQiDui && result.fanNum < qiDuiYiResult.fanNum)
+            if (result == null || (isQiDui && result.fanNum < qiDuiYiResult.fanNum))
                 result = qiDuiYiResult;
-            if (isGuoShi && result.fanNum < guoShiYiResult.fanNum)
+            if (result == null || (isGuoShi && result.fanNum < guoShiYiResult.fanNum))
                 result = guoShiYiResult;
+
+            if(result == null)
+            {
+                return new YiZhongResult(additionalYiZhongs);
+            }
 
             result = new YiZhongResult(result);
 

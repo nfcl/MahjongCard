@@ -65,9 +65,9 @@ namespace Card
             HashSet<CardKind> set = choice.cards.ToHashSet(CardKind.LogicEqualityComparer);
             cards.ForEach(_ => _.IsInteractableWithColor = set.Contains(_.faceKind, CardKind.LogicEqualityComparer) == choice.isWhite);
         }
-        public void BanCard(ChoiceLiZhi choice)
+        public void BanCard(ClientEachCardTingPais choice)
         {
-            HashSet<CardKind> set = choice.choices.cards.Select(_ => _.playCard).ToHashSet(CardKind.LogicEqualityComparer);
+            HashSet<CardKind> set = choice.cards.Select(_ => _.playCard).ToHashSet(CardKind.LogicEqualityComparer);
             cards.ForEach(_ => _.IsInteractableWithColor = set.Contains(_.faceKind, CardKind.LogicEqualityComparer));
         }
         public void SyncBaoPai()

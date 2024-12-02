@@ -31,7 +31,7 @@ namespace Card
         public long uuid;
         public ChoiceKind currentMode = ChoiceKind.None;
         public ChoicePlayCard playCardChoice;
-        public ClientEachCardTingPais tingPaiChoices;
+        public ClientEachCardTingPais tingPaiChoices => playCardChoice?.choices;
 
         private void Awake()
         {
@@ -44,9 +44,39 @@ namespace Card
             tingPaiShowButton.gameObject.SetActive(false);
         }
 
+        public void TryShowTingPai(CardKind card, bool isFromHandCard)
+        {
+            if(tingPaiChoices == null)
+            {
+                //Debug.Log("tingPaiChoices == null");
+                return;
+            }
+            if (currentMode != ChoiceKind.None && currentMode != ChoiceKind.PlayCard && currentMode != ChoiceKind.LiZhi)
+            {
+                //Debug.Log($"currentMode = {currentMode}");
+                return;
+            }
+            if (tingPaiChoices.selectIndex == -1)
+            {
+                //Debug.Log("showTingPaiChoices");
+                ShowTingPai(card);
+            }
+            else if (!isFromHandCard)
+            {
+                ShowTingPai(tingPaiChoices.selectIndex);
+            }
+        }
+        public void HideTingPaiPanel()
+        {
+            cardChoicePanel.Close();
+        }
         public void CloseTingPai()
         {
             cardChoicePanel.Close();
+        }
+        public void ShowTingPai(int index)
+        {
+            cardChoicePanel.Open(tingPaiChoices.cards[index]);
         }
         public bool ShowTingPai(CardKind card)
         {
@@ -93,6 +123,7 @@ namespace Card
                     handCard.lastCard = card;
                 }
             }
+            tingPaiChoices?.SelectPlayCard(card.faceKind);
         }
         public bool SubmitAction(Action action)
         {
@@ -155,13 +186,12 @@ namespace Card
                     case ChoiceKind.LiZhi:
                         {
                             needShowChoicesPanel = true;
+                            ChoiceLiZhi totalChoice = choice as ChoiceLiZhi;
                             data.Add((
                                 ChoiceKind.LiZhi,
                                 () =>
                                 {
-                                    ChoiceLiZhi totalChoice = choice as ChoiceLiZhi;
-                                    tingPaiChoices = totalChoice.choices;
-                                    handCard.BanCard(totalChoice);
+                                    handCard.BanCard(tingPaiChoices);
                                     currentMode = ChoiceKind.LiZhi;
                                     choicePanel.Close();
                                     liZhiCancelButton.gameObject.SetActive(true);

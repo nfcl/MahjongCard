@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Card
 {
-    public class UICard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class UICard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         public Image cardFace;
         public Image cardBack;
@@ -116,6 +116,16 @@ namespace Card
             }
             transform.localPosition = GameSceneUIManager.instance.gamePanel.handCard.GetExceptNormalCardPosition(handIndex);
             isInteractable = true;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            GameSceneUIManager.instance.gamePanel.TryShowTingPai(this.faceKind, true);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            GameSceneUIManager.instance.gamePanel.HideTingPaiPanel();
         }
     }
 }

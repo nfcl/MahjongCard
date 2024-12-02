@@ -46,38 +46,36 @@ namespace Data
     {
         public bool isWhite;
         public CardKind[] cards;
+        public ClientEachCardTingPais choices;
 
         public ChoicePlayCard() : base(ChoiceKind.PlayCard) { }
 
-        public static ChoicePlayCard NormalPlayCard()
+        public static ChoicePlayCard NormalPlayCard(ClientEachCardTingPais choices)
         {
             return new ChoicePlayCard()
             {
                 cards = new CardKind[0],
                 isWhite = false,
+                choices = choices
             };
         }
-        public static ChoicePlayCard BanPlayCard(CardKind[] cards)
+        public static ChoicePlayCard BanPlayCard(CardKind[] cards, ClientEachCardTingPais choices)
         {
             return new ChoicePlayCard()
             {
                 cards = cards,
-                isWhite = false
+                isWhite = false,
+                choices = choices
             };
         }
     }
     public class ChoiceLiZhi : Choice
     {
-        public ClientEachCardTingPais choices;
-
         public ChoiceLiZhi() : base(ChoiceKind.LiZhi) { }
 
-        public static ChoiceLiZhi LiZhi(ClientEachCardTingPais choices)
+        public static ChoiceLiZhi LiZhi()
         {
-            return new ChoiceLiZhi
-            {
-                choices = choices
-            };
+            return new ChoiceLiZhi();
         }
     }
     public class ChoiceGang : Choice
@@ -206,11 +204,6 @@ public static class ChoiceSerializer
                     ChoicePlayCard total = choice as ChoicePlayCard;
                     writer.WriteBool(total.isWhite);
                     writer.WriteArray(total.cards);
-                    break;
-                }
-            case ChoiceKind.LiZhi:
-                {
-                    ChoiceLiZhi total = choice as ChoiceLiZhi;
                     writer.Write<ClientEachCardTingPais>(total.choices);
                     break;
                 }
@@ -257,11 +250,12 @@ public static class ChoiceSerializer
                     {
                         isWhite = reader.ReadBool(),
                         cards = reader.ReadArray<CardKind>(),
+                        choices = reader.Read<ClientEachCardTingPais>()
                     };
                 }
             case ChoiceKind.LiZhi:
                 {
-                    return ChoiceLiZhi.LiZhi(reader.Read<ClientEachCardTingPais>());
+                    return ChoiceLiZhi.LiZhi();
                 }
             case ChoiceKind.JiuZhongJiuPai:
                 {

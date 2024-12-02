@@ -6,15 +6,35 @@ using System.Linq;
 
 namespace Data
 {
-    public struct ClientEachCardTingPais
+    public class ClientEachCardTingPais
     {
         public ClientCardTingPai[] cards;
+        public int selectIndex;
+        public bool isHePai => cards
+            .Any(_ =>
+                _.tingPais
+                    .Any(__ =>
+                        CardKind.LogicEqualityComparer.Equals(_.playCard, __.tingPai)
+                    )
+            );
+
+        public ClientEachCardTingPais()
+        {
+            cards = new ClientCardTingPai[0];
+            selectIndex = -1;
+        }
+
+        public void SelectPlayCard(CardKind card)
+        {
+            selectIndex = cards.FindIndex(_ => CardKind.LogicEqualityComparer.Equals(card, _.playCard));
+        }
 
         public static ClientEachCardTingPais Create(EachHandCardTingPaiResult data, int fanFu, Func<CardKind, int> lastCardCalculate, Func<int, int, bool> zhenTingChecker)
         {
             ClientEachCardTingPais result = new()
             {
-                cards = new ClientCardTingPai[data.choices.Length]
+                cards = new ClientCardTingPai[data.choices.Length],
+                selectIndex = -1
             };
 
             data.choices.Foreach((choice, index) =>
@@ -48,7 +68,7 @@ namespace Data
                 {
                     tingPais[i].state = ClientCardTingPaiState.WuYi;
                 }
-                else if (choice.Item2[i].tingPai.BestChoice().fanNum <fanFu)
+                else if (choice.Item2[i].tingPai.BestChoice().fanNum < fanFu)
                 {
                     tingPais[i].state = ClientCardTingPaiState.FanFu;
                 }
@@ -79,12 +99,14 @@ public static class ClientCardTingPaiSerializer
     public static void ClientEachCardTingPaisWriter(this NetworkWriter writer, ClientEachCardTingPais content)
     {
         writer.WriteArray(content.cards);
+        writer.WriteInt(content.selectIndex);
     }
     public static ClientEachCardTingPais ClientEachCardTingPaisReader(this NetworkReader reader)
     {
         return new ClientEachCardTingPais
         {
-            cards = reader.ReadArray<ClientCardTingPai>()
+            cards = reader.ReadArray<ClientCardTingPai>(),
+            selectIndex = reader.ReadInt()
         };
     }
     public static void ClientCardTingPaiWriter(this NetworkWriter writer, ClientCardTingPai content)
