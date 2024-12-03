@@ -408,6 +408,7 @@ namespace Manager
         {
             if (message.playerIndex == roomIndex)
             {
+                GameSceneUIManager.instance.gamePanel.tingPaiShowButton.SetActive(false);
                 GameSceneUIManager.instance.gamePanel.handCard.DrawCard(message.card, true);
             }
             DesktopManager.instance.handCards[GetAbsolutePlayerIndex(message.playerIndex)].DrawCard(message.card);
@@ -473,6 +474,7 @@ namespace Manager
             {
                 //自己鸣牌需要额外处理UI手牌
                 GameSceneUIManager.instance.gamePanel.handCard.MingCard(selfCards);
+                GameSceneUIManager.instance.gamePanel.tingPaiShowButton.SetActive(false);
             }
             if (kind == MingPaiKind.BaBei)
             {
@@ -503,6 +505,7 @@ namespace Manager
                 {
                     GameSceneUIManager.instance.gamePanel.handCard.MingCard(selfCards);
                 }
+                GameSceneUIManager.instance.gamePanel.tingPaiShowButton.SetActive(false);
             }
             if (kind == MingPaiKind.JiaGang)
             {

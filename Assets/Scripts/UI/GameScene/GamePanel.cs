@@ -27,7 +27,7 @@ namespace Card
         public ChoicePanel choicePanel;
         public CardChoicePanel cardChoicePanel;
         public Button liZhiCancelButton;
-        public Button tingPaiShowButton;
+        public GameObject tingPaiShowButton;
 
         public long uuid;
         public ChoiceKind currentMode = ChoiceKind.None;
@@ -42,7 +42,7 @@ namespace Card
             choicePanel.Close();
             cardChoicePanel.Close();
             liZhiCancelButton.gameObject.SetActive(false);
-            tingPaiShowButton.gameObject.SetActive(false);
+            tingPaiShowButton.SetActive(false);
         }
 
         public void ShowActionSprite(int playerIndex, ChoiceKind kind)
@@ -78,6 +78,14 @@ namespace Card
         public void CloseTingPai()
         {
             cardChoicePanel.Close();
+        }
+        public void ShowTingPai()
+        {
+            if(tingPaiChoices == null || tingPaiChoices.selectIndex == -1)
+            {
+                return;
+            }
+            ShowTingPai(tingPaiChoices.selectIndex);
         }
         public void ShowTingPai(int index)
         {
@@ -128,7 +136,14 @@ namespace Card
                     handCard.lastCard = card;
                 }
             }
-            tingPaiChoices?.SelectPlayCard(card.faceKind);
+            if (tingPaiChoices != null)
+            {
+                tingPaiChoices.SelectPlayCard(card.faceKind);
+                if (tingPaiChoices.selectIndex != -1)
+                {
+                    tingPaiShowButton.SetActive(true);
+                }
+            }
         }
         public bool SubmitAction(Action action)
         {
@@ -153,7 +168,7 @@ namespace Card
         }
         public void InitChoices(long uuid,  Choice[] choices, bool isDrawCard)
         {
-            tingPaiShowButton.gameObject.SetActive(false);
+            tingPaiShowButton.SetActive(false);
             cardChoicePanel.Close();
 
             this.uuid = uuid;
