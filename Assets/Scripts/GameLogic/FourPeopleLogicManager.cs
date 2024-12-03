@@ -64,7 +64,7 @@ namespace GameLogic
 
                 if (clientTingPaiChoice.cards.Length != 0)
                 {
-                    if (currentPlayer.ming.mingInfo.isMenQianQing)
+                    if (!currentPlayer.selfInfo.isLiangLiZhi && !currentPlayer.selfInfo.isLiZhi && currentPlayer.ming.mingInfo.isMenQianQing)
                     {
                         //立直
                         choices.Add(ChoiceLiZhi.LiZhi());
