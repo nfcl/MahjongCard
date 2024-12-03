@@ -16,6 +16,7 @@ namespace Data
         Gang,
         Peng,
         Chi,
+        BaBei,
         JiuZhongJiuPai,
         ZiMo,
         RongHe

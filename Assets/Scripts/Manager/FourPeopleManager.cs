@@ -433,6 +433,10 @@ namespace Manager
             {
                 GameSceneUIManager.instance.gamePanel.handCard.PlayCard(card);
             }
+            if (isLiZhi)
+            {
+                GameSceneUIManager.instance.gamePanel.ShowActionSprite(playerIndex, ChoiceKind.LiZhi);
+            }
             DesktopManager.instance.OnPlayerPlayCard(playerIndex, card, isLiZhi);
         }
 
@@ -468,10 +472,12 @@ namespace Manager
             if (kind == MingPaiKind.BaBei)
             {
                 DesktopManager.instance.BaBei(mingPlayerIndex);
+                GameSceneUIManager.instance.gamePanel.ShowActionSprite(mingPlayerIndex, ChoiceKind.BaBei);
             }
             else if (kind == MingPaiKind.AnGang)
             {
                 DesktopManager.instance.AnMingPai(kind, mingPlayerIndex, selfCards);
+                GameSceneUIManager.instance.gamePanel.ShowActionSprite(mingPlayerIndex, ChoiceKind.Gang);
             }
             else
             {
@@ -496,10 +502,18 @@ namespace Manager
             if (kind == MingPaiKind.JiaGang)
             {
                 DesktopManager.instance.JiaGang(mingPlayerIndex, selfCards[2]);
+                GameSceneUIManager.instance.gamePanel.ShowActionSprite(mingPlayerIndex, ChoiceKind.Gang);
             }
             else if (kind == MingPaiKind.Peng || kind == MingPaiKind.Chi || kind == MingPaiKind.MingGang)
             {
                 DesktopManager.instance.MingMingPai(kind, mingPlayerIndex, mingedPlayerIndex, otherCard, selfCards);
+                GameSceneUIManager.instance.gamePanel.ShowActionSprite(mingPlayerIndex, kind switch
+                {
+                    MingPaiKind.Peng => ChoiceKind.Peng,
+                    MingPaiKind.Chi => ChoiceKind.Chi,
+                    MingPaiKind.MingGang => ChoiceKind.Gang,
+                    _ => throw new NotImplementedException()
+                });
             }
             else
             {

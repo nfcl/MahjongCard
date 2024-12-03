@@ -22,6 +22,7 @@ namespace Card
         public Text globalTimeText;
         public Coroutine alarm;
         public bool isInteractable;
+        public Sprite[] ActionSprite;
 
         public ChoicePanel choicePanel;
         public CardChoicePanel cardChoicePanel;
@@ -44,6 +45,10 @@ namespace Card
             tingPaiShowButton.gameObject.SetActive(false);
         }
 
+        public void ShowActionSprite(int playerIndex, ChoiceKind kind)
+        {
+            userInfoItems[IGameLogicManager.instance.GetAbsolutePlayerIndex(playerIndex)].ShowActionSprite(kind);
+        }
         public void TryShowTingPai(CardKind card, bool isFromHandCard)
         {
             if(tingPaiChoices == null)
