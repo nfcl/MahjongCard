@@ -424,6 +424,11 @@ namespace Manager
 
             RpcPlayerPlayCard(player.playerIndex, card, isLiZhi);
 
+            if (isLiZhi)
+            {
+                RpcSyncLiZhi(liZhiNum);
+            }
+
             base.AfterPlayerPlayCard(player, card, isLiZhi);
         }
         [ClientRpc]

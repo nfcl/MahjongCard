@@ -55,16 +55,27 @@ namespace GameLogic
         {
             ClientEachCardTingPais clientTingPaiChoice = GetPlayerTingPaiResult(currentPlayer, isLingShang, false);
 
-            List<Choice> choices = new List<Choice>
+            List<Choice> choices = new List<Choice>();
+            if (!currentPlayer.selfInfo.IsLiZhi)
             {
-                //打牌
-                ChoicePlayCard.NormalPlayCard(clientTingPaiChoice)
-            };
+                {
+                    //打牌
+                    choices.Add(ChoicePlayCard.NormalPlayCard(clientTingPaiChoice));
+                }
+                //流局（九种九牌）
+                if (
+                    currentPlayer.selfInfo.drewCardNum == 1
+                    && players.Count(_ => _.ming.Count() != 0) == 0
+                    && currentPlayer.CheckJiuZhongJiuPai()
+                )
+                {
+                    choices.Add(new ChoiceJiuZhongJiuPai());
+                }
+            }
             {
-
                 if (clientTingPaiChoice.cards.Length != 0)
                 {
-                    if (!currentPlayer.selfInfo.isLiangLiZhi && !currentPlayer.selfInfo.isLiZhi && currentPlayer.ming.mingInfo.isMenQianQing)
+                    if (!currentPlayer.selfInfo.IsLiZhi && currentPlayer.ming.mingInfo.isMenQianQing)
                     {
                         //立直
                         choices.Add(ChoiceLiZhi.LiZhi());
@@ -80,15 +91,6 @@ namespace GameLogic
             if (paiShan.CanGang && currentPlayer.CheckDrawCardGang(out ChoiceGang choice))
             {
                 choices.Add(choice);
-            }
-            //流局（九种九牌）
-            if (
-                currentPlayer.selfInfo.drewCardNum == 1
-                && players.Count(_ => _.ming.Count() != 0) == 0
-                && currentPlayer.CheckJiuZhongJiuPai()
-            )
-            {
-                choices.Add(new ChoiceJiuZhongJiuPai());
             }
             return choices.ToArray();
         }
@@ -343,6 +345,7 @@ namespace GameLogic
                     {
                         ActionLiZhi totalAction = action as ActionLiZhi;
                         CardKind liZhiCard = totalAction.card;
+                        liZhiNum += 1;
                         OnPlayerPlayCard(player, liZhiCard, true);
                         break;
                     }
@@ -428,6 +431,23 @@ namespace GameLogic
         }
         public virtual void AfterPlayerDrawCard(LogicPlayer player, CardKind card, bool isLingShang)
         {
+            Choice[] choices = GetChoiceAfterDrawCard(isLingShang);
+
+            if (player.selfInfo.IsLiZhi)
+            {
+                if (choices.Length == 0)
+                {//立直后如果没有别的选项（暗杠）,则直接把抽到的牌打出
+                    DOTween.Sequence().AppendInterval(2).AppendCallback(() => OnPlayerPlayCard(player, card, false));
+                    return;
+                }
+                //有暗杠还是要继续走玩家选择的流程
+            }
+
+            playerChoices = new (LogicPlayer player, Choice[] choices)[]
+            {
+                (player, choices)
+            };
+
             WaitPlayer<Action> waitPlayer = WaitPlayer<Action>.WaitForPlayerSelect(
                 player,
                 new ActionPlayCard(player.LastDrewCard)
@@ -439,13 +459,6 @@ namespace GameLogic
                     ProcessDrawCardChoices(_[0].Item1, _[0].Item2);
                 }
             );
-
-            Choice[] choices = GetChoiceAfterDrawCard(isLingShang);
-
-            playerChoices = new (LogicPlayer player, Choice[] choices)[]
-            {
-                (player, choices)
-            };
 
             OnSendPlayerChoice(player, wait.uuid, choices, true);
 
