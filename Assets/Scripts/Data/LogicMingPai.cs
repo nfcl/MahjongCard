@@ -22,6 +22,14 @@ namespace Data
         {
             groups = new List<LogicMingPaiGroup>();
         }
+        public LogicMingPai(LogicMingPai other)
+        {
+            groups = new List<LogicMingPaiGroup>(other.groups.Count);
+            other.groups.Foreach((_, _index) =>
+            {
+                groups[_index] = new LogicMingPaiGroup(_)
+            });
+        }
         public void MingCard(LogicMingPaiGroup group)
         {
             groups.Add(group);

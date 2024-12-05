@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 
 namespace Data
 {
@@ -10,6 +11,10 @@ namespace Data
         public LogicPaiHe()
         {
             cards = new List<CardKind>();
+        }
+        public LogicPaiHe(LogicPaiHe other)
+        {
+            cards = (cards.ToArray().Clone() as CardKind[]).ToList();
         }
         public void PlayCard(CardKind card)
         {

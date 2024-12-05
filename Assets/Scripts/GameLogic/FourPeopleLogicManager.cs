@@ -54,12 +54,12 @@ namespace GameLogic
         public Choice[] GetChoiceAfterDrawCard(bool isLingShang)
         {
             ClientEachCardTingPais clientTingPaiChoice = GetPlayerTingPaiResult(currentPlayer, isLingShang, false);
-
+             
             List<Choice> choices = new List<Choice>();
             if (!currentPlayer.selfInfo.IsLiZhi)
             {
+                //打牌
                 {
-                    //打牌
                     choices.Add(ChoicePlayCard.NormalPlayCard(clientTingPaiChoice));
                 }
                 //流局（九种九牌）
@@ -71,13 +71,11 @@ namespace GameLogic
                 {
                     choices.Add(new ChoiceJiuZhongJiuPai());
                 }
-            }
-            {
                 if (clientTingPaiChoice.cards.Length != 0)
                 {
-                    if (!currentPlayer.selfInfo.IsLiZhi && currentPlayer.ming.mingInfo.isMenQianQing)
+                    //立直
+                    if (currentPlayer.ming.mingInfo.isMenQianQing)
                     {
-                        //立直
                         choices.Add(ChoiceLiZhi.LiZhi());
                     }
                     //自摸
@@ -86,11 +84,55 @@ namespace GameLogic
                         choices.Add(ChoiceZiMo.ZiMo());
                     }
                 }
+                //暗杠或加杠
+                if (paiShan.CanGang && currentPlayer.CheckDrawCardGang(out ChoiceGang choice))
+                {
+                    choices.Add(choice);
+                }
             }
-            //暗杠或加杠
-            if (paiShan.CanGang && currentPlayer.CheckDrawCardGang(out ChoiceGang choice))
+            else
             {
-                choices.Add(choice);
+                if (clientTingPaiChoice.cards.Length != 0)
+                {
+                    //自摸
+                    if (clientTingPaiChoice.isHePai)
+                    {
+                        choices.Add(ChoiceZiMo.ZiMo());
+                    }
+                }
+                if (paiShan.CanGang && currentPlayer.CheckDrewCardCanGang(out ChoiceGang.GangData choice))
+                {
+                    LogicPlayer gangedPlayer = new LogicPlayer(currentPlayer);
+
+                    LogicMingPaiGroup group = new LogicMingPaiGroup
+                    (
+                        MingPaiKind.AnGang,
+                        IGameLogicManager.instance.GetPlayerDistance(currentPlayerIndex, currentPlayerIndex),
+                        new CardKind(-1),
+                        choice.cards,
+                        choice.cards[0].huaseKind,
+                        choice.cards[0].huaseNum
+                    );
+
+                    gangedPlayer.AnMingPai(group);
+
+                    ClientEachCardTingPais tempChoices = GetPlayerTingPaiResult(gangedPlayer, isLingShang, false);
+
+                    CardKind[] oldTingPai = clientTingPaiChoice.cards
+                        .First(_ => CardKind.LogicEqualityComparer.Equals(_.playCard, currentPlayer.LastDrewCard)).tingPais
+                        .Select(_ => _.tingPai)
+                        .ToArray();
+
+                    CardKind[] newTingPai = tempChoices.cards
+                        .First(_ => CardKind.LogicEqualityComparer.Equals(_.playCard, currentPlayer.LastDrewCard)).tingPais
+                        .Select(_ => _.tingPai)
+                        .ToArray();
+
+                    if (oldTingPai.Except(newTingPai, CardKind.LogicEqualityComparer).Count() == 0)
+                    {//差集为空 不存在改听 能暗杠
+                        choices.Add(ChoiceGang.Gang(new ChoiceGang.GangData[] { choice }));
+                    }
+                }
             }
             return choices.ToArray();
         }
@@ -532,14 +574,14 @@ namespace GameLogic
                 case MingPaiKind.Peng:
                     {
                         LogicMingPaiGroup group = new LogicMingPaiGroup
-                        {
-                            kind = MingPaiKind.Peng,
-                            otherCard = cards[2],
-                            selfCard = cards.Take(2).ToArray(),
-                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
-                            signKind = cards[0].huaseKind,
-                            signNum = cards[0].huaseNum
-                        };
+                        (
+                            MingPaiKind.Peng,
+                            IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            cards[2],
+                            cards.Take(2).ToArray(),
+                            cards[0].huaseKind,
+                            cards[0].huaseNum
+                        );
                         player.MingMingPai(currentPlayer, group);
                         break;
                     }
@@ -547,42 +589,42 @@ namespace GameLogic
                     {
                         CardKind signCard = cards.OrderBy(_ => _.huaseNum).First();
                         LogicMingPaiGroup group = new LogicMingPaiGroup
-                        {
-                            kind = MingPaiKind.Chi,
-                            otherCard = cards[2],
-                            selfCard = cards.Take(2).ToArray(),
-                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
-                            signKind = signCard.huaseKind,
-                            signNum = signCard.huaseNum
-                        };
+                        (
+                            MingPaiKind.Chi,
+                            IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            cards[2],
+                            cards.Take(2).ToArray(),
+                            signCard.huaseKind,
+                            signCard.huaseNum
+                        );
                         player.MingMingPai(currentPlayer, group);
                         break;
                     }
                 case MingPaiKind.MingGang:
                     {
                         LogicMingPaiGroup group = new LogicMingPaiGroup
-                        {
-                            kind = MingPaiKind.MingGang,
-                            otherCard = cards[3],
-                            selfCard = cards.Take(3).ToArray(),
-                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
-                            signKind = cards[0].huaseKind,
-                            signNum = cards[0].huaseNum
-                        };
+                        (
+                            MingPaiKind.MingGang,
+                            IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            cards[3],
+                            cards.Take(3).ToArray(),
+                            cards[0].huaseKind,
+                            cards[0].huaseNum
+                        );
                         player.MingMingPai(currentPlayer, group);
                         break;
                     }
                 case MingPaiKind.AnGang:
                     {
                         LogicMingPaiGroup group = new LogicMingPaiGroup
-                        {
-                            kind = MingPaiKind.AnGang,
-                            otherCard = new CardKind(-1),
-                            selfCard = cards,
-                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
-                            signKind = cards[0].huaseKind,
-                            signNum = cards[0].huaseNum
-                        };
+                        (
+                            MingPaiKind.AnGang,
+                            IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            new CardKind(-1),
+                            cards,
+                            cards[0].huaseKind,
+                            cards[0].huaseNum
+                        );
                         player.AnMingPai(group);
                         break;
                     }
@@ -594,14 +636,14 @@ namespace GameLogic
                 case MingPaiKind.BaBei:
                     {
                         LogicMingPaiGroup group = new LogicMingPaiGroup
-                        {
-                            kind = MingPaiKind.BaBei,
-                            otherCard = new CardKind(-1),
-                            selfCard = cards,
-                            self2Otherdistance = IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
-                            signKind = cards[0].huaseKind,
-                            signNum = cards[0].huaseNum
-                        };
+                        (
+                            MingPaiKind.BaBei,
+                            IGameLogicManager.instance.GetPlayerDistance(player.playerIndex, currentPlayer.playerIndex),
+                            new CardKind(-1),
+                            cards,
+                            cards[0].huaseKind,
+                            cards[0].huaseNum
+                        );
                         player.AnMingPai(group);
                         break;
                     }

@@ -11,6 +11,24 @@ namespace Data
         public int signKind;
         public int signNum;
 
+        public LogicMingPaiGroup(LogicMingPaiGroup other)
+        {
+            kind = other.kind;
+            self2Otherdistance= other.self2Otherdistance;
+            otherCard = other.otherCard;
+            selfCard = other.selfCard.Clone() as CardKind[];
+            signKind = other.signKind;
+            signNum = other.signNum;
+        }
+        public LogicMingPaiGroup(MingPaiKind kind, int self2Otherdistance, CardKind otherCard, CardKind[] selfCard, int signKind, int signNum)
+        {
+            this.kind = kind;
+            this.self2Otherdistance = self2Otherdistance;
+            this.otherCard = otherCard;
+            this.selfCard = selfCard;
+            this.signKind = signKind;
+            this.signNum = signNum;
+        }
         public CardKind[] GetCards()
         {
             if(kind == MingPaiKind.BaBei || kind == MingPaiKind.AnGang)

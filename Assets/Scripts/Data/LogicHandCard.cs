@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Data
@@ -14,6 +15,11 @@ namespace Data
         public LogicHandCard()
         {
             cards = new List<CardKind>();
+        }
+        public LogicHandCard(LogicHandCard other)
+        {
+            cards = (other.cards.ToArray().Clone() as CardKind[]).ToList();
+            lastDrewCard = other.lastDrewCard;
         }
         public void Init(CardKind[] configurCards)
         {

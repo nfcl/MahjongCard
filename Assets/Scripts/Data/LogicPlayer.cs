@@ -19,6 +19,19 @@ namespace Data
         public int res;
         public bool[] zhenTingRecoder;
 
+        public LogicPlayer(LogicPlayer other)
+        {
+            selfInfo = other.selfInfo;
+
+            playerIndex = other.playerIndex;
+            hand = new LogicHandCard(other.hand);
+            paiHe = new LogicPaiHe(other.paiHe);
+            ming = new LogicMingPai(other.ming);
+            roundWaitTime = other.roundWaitTime;
+            globalWaitTime = other.globalWaitTime;
+            res = other.res;
+            zhenTingRecoder = other.zhenTingRecoder.Clone() as bool[];
+        }
         public LogicPlayer(int playerIndex, float roundWaitTime, float globalWaitTime, int res)
         {
             hand = null;
@@ -129,6 +142,18 @@ namespace Data
                 (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6)
             };
             return yaojius.Count(_ => matrix[_.Item1, _.Item2] != 0) >= 9;
+        }
+        public bool CheckDrewCardCanGang(out ChoiceGang.GangData gang)
+        {
+            gang = new ChoiceGang.GangData();
+            gang.cards = hand.Cards.Where(_ => CardKind.LogicEqualityComparer.Equals(_, hand.lastDrewCard)).ToArray();
+            if (gang.cards.Length == 4)
+            {
+                gang.kind = ChoiceGang.GangKind.AnGang;
+                return true;
+            }
+            gang = null;
+            return false;
         }
     }
 }
