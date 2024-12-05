@@ -550,10 +550,11 @@ public static class LinqExtension
         int index = 0;
         foreach (var item in items)
         {
-            if (predicate(item)) break;
+            if (predicate(item)) 
+                return index;
             index += 1;
         }
-        return index;
+        return -1;
     }
     public static void Foreach<T>(this IEnumerable<T> items, Action<T, int> action)
     {
