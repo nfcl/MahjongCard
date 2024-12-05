@@ -5,6 +5,16 @@ using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 
+// FUTURE
+// 听牌的余牌信息逻辑添加
+// 和牌逻辑添加
+// 对局结算逻辑添加
+// 对局结算场景搭建
+// 游戏结束返回房间逻辑添加
+
+//BUG
+// 听牌的立直无役逻辑修复
+
 namespace GameLogic
 {
     public class FourPeopleLogicManager : NetworkBehaviour
