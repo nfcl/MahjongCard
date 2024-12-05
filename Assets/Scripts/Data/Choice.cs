@@ -11,6 +11,7 @@ namespace Data
     {
         None,
         Skip,
+        TingPai,
         PlayCard,
         LiZhi,
         Gang,
@@ -43,30 +44,41 @@ namespace Data
             return choices.Aggregate("Choices : ", (_, __) => $"{_}\n\t{__}");
         }
     }
+    public class ChoiceTingPai: Choice
+    {
+        public ClientEachCardTingPais choices;
+
+        public ChoiceTingPai() : base(ChoiceKind.TingPai) { }
+
+        public static ChoiceTingPai TingPai(ClientEachCardTingPais choices)
+        {
+            return new ChoiceTingPai
+            {
+                choices = choices
+            };
+        }
+    }
     public class ChoicePlayCard : Choice
     {
         public bool isWhite;
         public CardKind[] cards;
-        public ClientEachCardTingPais choices;
 
         public ChoicePlayCard() : base(ChoiceKind.PlayCard) { }
 
-        public static ChoicePlayCard NormalPlayCard(ClientEachCardTingPais choices)
+        public static ChoicePlayCard NormalPlayCard()
         {
             return new ChoicePlayCard()
             {
                 cards = new CardKind[0],
-                isWhite = false,
-                choices = choices
+                isWhite = false
             };
         }
-        public static ChoicePlayCard BanPlayCard(CardKind[] cards, ClientEachCardTingPais choices)
+        public static ChoicePlayCard BanPlayCard(CardKind[] cards)
         {
             return new ChoicePlayCard()
             {
                 cards = cards,
-                isWhite = false,
-                choices = choices
+                isWhite = false
             };
         }
     }
@@ -200,12 +212,17 @@ public static class ChoiceSerializer
         writer.Write<ChoiceKind>(choice.kind);
         switch (choice.kind)
         {
+            case ChoiceKind.TingPai:
+                {
+                    ChoiceTingPai total = choice as ChoiceTingPai;
+                    writer.Write<ClientEachCardTingPais>(total.choices);
+                    break;
+                }
             case ChoiceKind.PlayCard:
                 {
                     ChoicePlayCard total = choice as ChoicePlayCard;
                     writer.WriteBool(total.isWhite);
                     writer.WriteArray(total.cards);
-                    writer.Write<ClientEachCardTingPais>(total.choices);
                     break;
                 }
             case ChoiceKind.Peng:
@@ -245,13 +262,16 @@ public static class ChoiceSerializer
         ChoiceKind kind = reader.Read<ChoiceKind>();
         switch (kind)
         {
+            case ChoiceKind.TingPai:
+                {
+                    return ChoiceTingPai.TingPai(reader.Read<ClientEachCardTingPais>());
+                }
             case ChoiceKind.PlayCard:
                 {
                     return new ChoicePlayCard
                     {
                         isWhite = reader.ReadBool(),
-                        cards = reader.ReadArray<CardKind>(),
-                        choices = reader.Read<ClientEachCardTingPais>()
+                        cards = reader.ReadArray<CardKind>()
                     };
                 }
             case ChoiceKind.LiZhi:

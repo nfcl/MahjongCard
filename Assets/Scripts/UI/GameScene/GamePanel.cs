@@ -32,7 +32,7 @@ namespace Card
         public long uuid;
         public ChoiceKind currentMode = ChoiceKind.None;
         public ChoicePlayCard playCardChoice;
-        public ClientEachCardTingPais tingPaiChoices => playCardChoice?.choices;
+        public ClientEachCardTingPais tingPaiChoices;
 
         private void Awake()
         {
@@ -185,6 +185,12 @@ namespace Card
             }
 
             playCardChoice = choices.FirstOrDefault(_ => _.kind == ChoiceKind.PlayCard) as ChoicePlayCard;
+
+
+            if (choices.FirstOrDefault(_ => _.kind == ChoiceKind.TingPai) is ChoiceTingPai choiceTingPai)
+            {
+                tingPaiChoices = choiceTingPai.choices;
+            }
 
             if (playCardChoice == null)
             {
