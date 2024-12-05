@@ -438,6 +438,10 @@ namespace Manager
             if(roomIndex == playerIndex)
             {
                 GameSceneUIManager.instance.gamePanel.handCard.PlayCard(card);
+                if(GameSceneUIManager.instance.gamePanel.tingPaiChoices?.selectIndex != -1)
+                {
+                    GameSceneUIManager.instance.gamePanel.tingPaiShowButton.SetActive(true);
+                }
             }
             if (isLiZhi)
             {

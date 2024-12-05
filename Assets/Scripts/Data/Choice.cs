@@ -47,14 +47,16 @@ namespace Data
     public class ChoiceTingPai: Choice
     {
         public ClientEachCardTingPais choices;
+        public bool isLiZhi;
 
         public ChoiceTingPai() : base(ChoiceKind.TingPai) { }
 
-        public static ChoiceTingPai TingPai(ClientEachCardTingPais choices)
+        public static ChoiceTingPai TingPai(ClientEachCardTingPais choices, bool isLiZhi)
         {
             return new ChoiceTingPai
             {
-                choices = choices
+                choices = choices,
+                isLiZhi = isLiZhi
             };
         }
     }
@@ -216,6 +218,7 @@ public static class ChoiceSerializer
                 {
                     ChoiceTingPai total = choice as ChoiceTingPai;
                     writer.Write<ClientEachCardTingPais>(total.choices);
+                    writer.WriteBool(total.isLiZhi);
                     break;
                 }
             case ChoiceKind.PlayCard:
@@ -264,7 +267,7 @@ public static class ChoiceSerializer
         {
             case ChoiceKind.TingPai:
                 {
-                    return ChoiceTingPai.TingPai(reader.Read<ClientEachCardTingPais>());
+                    return ChoiceTingPai.TingPai(reader.Read<ClientEachCardTingPais>(), reader.ReadBool());
                 }
             case ChoiceKind.PlayCard:
                 {

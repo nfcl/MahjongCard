@@ -57,7 +57,7 @@ namespace GameLogic
              
             List<Choice> choices = new List<Choice>();
 
-            choices.Add(ChoiceTingPai.TingPai(clientTingPaiChoice));
+            choices.Add(ChoiceTingPai.TingPai(clientTingPaiChoice, currentPlayer.selfInfo.IsLiZhi));
 
             if (!currentPlayer.selfInfo.IsLiZhi)
             {
@@ -142,28 +142,32 @@ namespace GameLogic
         public Choice[] GetChoiceAfterPlayCard(LogicPlayer other, LogicPlayer self, CardKind playedCard)
         {
             List<Choice> choices = new List<Choice>();
-            //碰
+
+            if (!self.selfInfo.IsLiZhi)
             {
-                if(self.CheckPeng(out ChoicePeng choice, self.playerIndex, playedCard))
+                //碰
                 {
-                    choices.Add(choice);
+                    if (self.CheckPeng(out ChoicePeng choice, self.playerIndex, playedCard))
+                    {
+                        choices.Add(choice);
+                    }
                 }
-            }
-            //吃
-            {
-                if (
-                    (other.playerIndex + 1) % DataManager.playerNum == self.playerIndex
-                    && self.CheckChi(out ChoiceChi choice, self.playerIndex, playedCard)
-                )
+                //吃
                 {
-                    choices.Add(choice);
+                    if (
+                        (other.playerIndex + 1) % DataManager.playerNum == self.playerIndex
+                        && self.CheckChi(out ChoiceChi choice, self.playerIndex, playedCard)
+                    )
+                    {
+                        choices.Add(choice);
+                    }
                 }
-            }
-            //明杠
-            {
-                if (paiShan.CanGang && self.CheckPlayCardGang(out ChoiceGang choice, playedCard))
+                //明杠
                 {
-                    choices.Add(choice);
+                    if (paiShan.CanGang && self.CheckPlayCardGang(out ChoiceGang choice, playedCard))
+                    {
+                        choices.Add(choice);
+                    }
                 }
             }
             //荣和
@@ -181,7 +185,7 @@ namespace GameLogic
 
             List<Choice> choices = new List<Choice>();
 
-            choices.Add(ChoiceTingPai.TingPai(clientTingPaiChoice));
+            choices.Add(ChoiceTingPai.TingPai(clientTingPaiChoice, false));
 
             //打牌 食替相关 吃或碰了什么牌就不能在本回合打出相同的牌
             if (group.kind == MingPaiKind.Chi)
@@ -478,7 +482,7 @@ namespace GameLogic
 
             if (player.selfInfo.IsLiZhi)
             {
-                if (choices.Length == 0)
+                if (choices.Length == 1)//1是因为有个ChoiceTingPai
                 {//立直后如果没有别的选项（暗杠）,则直接把抽到的牌打出
                     DOTween.Sequence().AppendInterval(2).AppendCallback(() => OnPlayerPlayCard(player, card, false));
                     return;

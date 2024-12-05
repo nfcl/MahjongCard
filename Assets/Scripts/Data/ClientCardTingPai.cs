@@ -46,6 +46,14 @@ namespace Data
 
             return result;
         }
+
+        public override string ToString()
+        {
+            return cards.Aggregate($"SelectIndex = {selectIndex}", (_Str, _) =>
+            {
+                return _Str + $"\n\t{_.playCard}";
+            });
+        }
     }
     public struct ClientCardTingPai
     {

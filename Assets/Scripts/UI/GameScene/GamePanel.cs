@@ -186,9 +186,12 @@ namespace Card
 
             playCardChoice = choices.FirstOrDefault(_ => _.kind == ChoiceKind.PlayCard) as ChoicePlayCard;
 
-
             if (choices.FirstOrDefault(_ => _.kind == ChoiceKind.TingPai) is ChoiceTingPai choiceTingPai)
             {
+                if (choiceTingPai.isLiZhi)
+                {
+                    choiceTingPai.choices.selectIndex = tingPaiChoices.selectIndex;
+                }
                 tingPaiChoices = choiceTingPai.choices;
             }
 
